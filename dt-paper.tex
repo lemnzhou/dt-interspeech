@@ -16,7 +16,8 @@
        Fraunhofer IAIS
 }
 
-\email{  % FIXME: Set appropriate email addresses
+% FIXME: Set appropriate email addresses
+\email{
        abdullah.motjuste@gmail.com,
        joachim.koehler@iais.fraunhofer.de,
        michael.gref@fraunhofer.de
@@ -26,28 +27,113 @@
 
 \maketitle
 
-% ---------------------------------------------------------------------------- ABSTRACT -
+% ----------------------------------------------------------------------------------------- UTILS -
+\newcommand{\outline}[1]{}  % outline notes that will not be exported.
+\newcommand{\widom}[1]{}  % gudelines from https://cs.stanford.edu/people/widom/paper-writing.html
+
+% -------------------------------------------------------------------------------------- ABSTRACT -
 \begin{abstract}
+\widom{
+       - the problem,
+       - the approach and solutions
+       - the main contributions of the paper.
+       - little if any background and motivation. address the experts.
+       - factual but comprehensive.
+}
+
 We present a deep learning based approach for detecting overlapping speech which occur naturally during normal conversations (aka double-talk).
 We evaluate appropriately training a Deep Convolutional Neural Nectwork (DCNN) in a supervised manner for the purpose,
 which involves \ldots
 
 \end{abstract}
 
-% ------------------------------------------------------------------------- INDEX TERMS -
+% ----------------------------------------------------------------------------------- INDEX TERMS -
 \noindent\textbf{Index Terms}:
 overlapping-speech detection,
 speech segmentation,
 deep convolutional neural network,
 re-balancing data,
 
-% ------------------------------------------------------------------------ INTRODUCTION -
+% ---------------------------------------------------------------------------------- INTRODUCTION -
 \section{Introduction}
+\widom{
+       - What is the problem?
+       - Why is it interesting and important?
+       - Why is it hard? (E.g., why do naive approaches fail?)
+       - Why hasn't it been solved before? Or,
+       - What's wrong with other solutions? How does mine differ?
+       - What are the key components of my approach and results?
+       - Any specific limitations of my approach?
+       - Short yet detailed enough `Related Works` near the end, or make it as Section 2.
+       - `Summary of Contributions` as the final para or subsection.
+              - List the major contributions in bullet form,
+              - Mention in which sections they can be found, doubling up as an outline.
+}
+\outline{
+       1 [ ] Double-Talks occur frequently & naturally during normal conversations.
+       2 [ ] This is different from the Cocktail Party Problem.
+       1 [ ] Conversation Analysis / Interactional Linguistics is very interested in it.
+       3 [ ] Can be a metric of ad-hoc relationships b/w participants, culture, etc.
+       2 [ ] Manual annotation is very expensive.
+
+       2 [ ] Figure with segment lengths
+       1 [ ] They are frequent, but very short-lived, typical (median) duration of \leq{1.5} sec.
+       1 [ ] The classes are heavily imbalanced, especially so against DT.
+       2 [ ] Agrees with theories that a 1-spk speaks most of the time w/ min. gaps or overlaps.
+       1 [ ] Automatic detection with high resolution is important, but extremely challenging.
+
+       1 [ ] Most of existing speech technology work done on this problem is in Speaker Diarization.
+       1 [ ] Diarzn is done purely using the acoustic data, and unsupervised.
+       1 [ ] Most Diarzn are not designed for more than 1 simultaneous speakers.
+       1 [ ] Motivated to improve SOTA performance, and has been termed as their Achilles' Heel.
+       1 [ ] Diarzn based pre-processing for ASR that can't handle DT makes ASR suffer as well.
+       3 [ ] And still does, even with DL-based leaps in conversational ASR.
+       3 [ ] The errors are less obvious in ASR wrt WER as most overlaps are single word long.
+
+       3 [ ] Ideal Diarzn is perfect for Conv-Analysts.
+       1 [ ] Most proposals train a model-based standalone DT detection system.
+       1 [ ] The detections are then used to exclude or attribute second speaker (no details).
+       1 [ ] Other approaches \ldots (page 10 of thesis; no details)
+       1 [ ] We are not concerned with handling DT, only detecting them, for the Conv-Analysts.
+
+       1 [ ] Almost all dedicated DT-system approaches use a GMM-HMM based approach for 3 classes.
+       1 [ ] There is also one with LSTM-HMM \ldots
+       1 [ ] The performances are not really that good, leading to the claim of extreme difficulty.
+       1 [ ] There is apparently a very steep trade-off between precision and recall.
+
+       1 [ ] Previous works have worked on finding the right acoustic features.
+       1 [ ] MFCCs are not enough.
+       1 [ ] For mono-aural setting \ldots (main related works)
+       1 [ ] There have been approaches using multi-mic, but they're not available in all situations
+
+       1 [ ] There have also been other recent proposals, but only on artificially overlapped data.
+       1 [ ] (Pyknogram rant.)
+       1 [ ] (That CNN paper from Joachim.)
+       1 [ ] (Why training & evaluating on artificial data should be done carefully.)
+
+       1 [ ] Lack of big & accurate dataset is an issue, and perhaps hence artificial ones is used.
+       1 [ ] We use Fisher Corpus for its size and natural overlaps. (more in appropriate section).
+       1 [ ] We also limit ourselves to the mono-aural setting, so that the results are versatile.
+
+       1 [ ] Finally, we explore using DCNN on reltvy. low-level FBanks to avoid feature engg.
+       1 [ ] DL is powerful. DCNN is used as a feature extractor in many scenarios w/ great results.
+       3 [ ] DL in unsupervised Diarzn is still an active area of research. (w/ summary?)
+       1 [ ] DL for supervised DT-detection is straightforward to comprehend, but \ldots
+       1 [ ] The severe class-imbalance makes it important to train the n/w properly.
+       1 [ ] We discuss re-balancing the dataset in its own section.
+       1 [ ] The proposed DCNN based classifier's preds. are noisy.
+       1 [ ] We use Viterbi algo to smooth-out the predictions based on long-term temporal patterns.
+       1 [ ] We report results from exhaustive empircal results on which strategies worked out.
+       1 [ ] This includes brief observations on failure condn. of the DCNN, & total failure of DNN.
+       1 [ ] leading to the conclusion that DL is a worthwhile direction to take,
+       2 [ ] including the use of RNNs to fix the long-term pattern recognition.
+}
+
 % TODO: Figure out how to cite the author's names automatically
+
 For sanity, let us refer to the paper \cite{rabiner_tutorial_1989} without the author's name.
 
-
-% ------------------------------------------------------------------------ BIBLIOGRAPHY -
+% ---------------------------------------------------------------------------------- BIBLIOGRAPHY -
 \bibliographystyle{IEEEtran}
 \bibliography{dt-paper}
 \end{document}
