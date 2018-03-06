@@ -70,14 +70,14 @@ re-balancing data,
               - Mention in which sections they can be found, doubling up as an outline.
 }
 \outline{
-       1 [ ] Double-Talks occur frequently & naturally during normal conversations.
+       1 [X] Double-Talks occur frequently & naturally during normal conversations.
        2 [ ] This is different from the Cocktail Party Problem.
-       1 [ ] Conversation Analysis / Interactional Linguistics is very interested in it.
+       1 [X] Conversation Analysis / Interactional Linguistics is very interested in it.
        3 [ ] Can be a metric of ad-hoc relationships b/w participants, culture, etc.
-       2 [ ] Manual annotation is very expensive.
+       2 [X] Manual annotation is very expensive.
 
-       2 [ ] Figure with segment lengths
-       1 [ ] They are frequent, but very short-lived, typical (median) duration of \leq{1.5} sec.
+       1 [ ] Figure with segment lengths
+       1 [X] They are frequent, but very short-lived, typical (median) duration of \leq{1.5} sec.
        1 [ ] The classes are heavily imbalanced, especially so against DT.
        2 [ ] Agrees with theories that a 1-spk speaks most of the time w/ min. gaps or overlaps.
        1 [ ] Automatic detection with high resolution is important, but extremely challenging.
@@ -130,6 +130,47 @@ re-balancing data,
 }
 
 % TODO: Figure out how to cite the author's names automatically
+
+Overlapping speech, also referred to as double-talk,
+occurs when more than one speakers speak simultaneously at a given instant of time.
+This is a very common occurrence in spontaneous conversations where other participants make an utterance while a speaker is already speaking for many possible reasons,
+including non-competitive acknowledgements like “mhm" or reactions like laughing,
+or competitive interruptions like when having misjudged their turn to speak.
+In fact, the occurrence of double-talks can add to the naturalness of a conversation \cite{shriberg_spontaneous_2005,NenkovaHighFrequencyWord2008},
+and is a subject of interest in the area of Conversation Analysis while studying the ad-hoc mechanisms by which particpants manage turn-taking during a conversation.
+While the frequency and duration of overlaps can vary depending on the situation,
+overlaps are quite frequent and characteristically brief (predominently smaller than 1\,second)
+during normal, spontaneous conversations.  % TODO: T [fig] for dt-distribution
+The characteristically small duration makes annotating them precisely a very expensive manual endeavor for Conversation Analysis,
+while attempts to automate the process have found it to be an extremely challenging task.
+
+The flagship scenario of most automated speech technologies is of spontaneous conversations,
+and the presence of double-talks is often detrimental to the performance of such technologies when not appropriately handled.
+Speaker diarization systems, whose goal is to determine `who spoke when' in a recording with more than one speakers,
+are penalized when they miss additional speakers in segments with overlapping speech.
+In the increasingly better state-of-the-art performance of such systems,
+this penalty has come to account for a major portion of the errors that remain,
+so much so that Anguera et al. claim overlapping speech situations to be the `Achilles heel' of speaker diarization systems when applied to recordings of meetings \cite{anguera_speaker_2012}.
+Many other speech technologies (e.g. Automatic Speech Recognition) rely on speaker homogenous segmentations produced by a speaker diarization system in a pre-processing step,
+and hence also suffer from degraded performance in situations of missed double-talks \cite{cetin_speaker_2006}.
+
+Perhaps consequently, most previous attempts at detecting natural double-talks in conversations have been made in lieu of improving speaker diarization systems.
+The most successful approaches propose employing a dedicated and purely acoustic overlap detection system.
+The problem has most commonly been formulated as performing frame-wise classification for the presence of either zero (i.e. silence), one, or two (or more) currently active speakers,
+and implemented in a GMM-HMM based framework while experimenting with different combinations of acoustic features.  % TODO: T [ref] for all the main ovl in diarzn studies
+In general, using additional features from blah, blah, blah, or blah % TODO: T [text] summarize other features
+have been found to improve overlap detection over using only spectral features.
+Geiger et al. blah blah blah  % TODO: T [text] summarize LSTM-HMM approach.
+% TODO: T [search] sweep any new DL-based overlap detection in natural conversations.
+The problem of overlap detection has remained unsolved
+and continues to present a steep trade-off between precision and recall of the system.
+
+The most potent source of challenge in detecting overlaps is rooted in the inherent imbalance between the three classes.
+It can be seen in Table X that in spontaneous conversations,  % TODO: T [tbl] Add table of segment and duration proportions.
+while the individual occurrences of natural overlaps constitute a significant proportion of the total number of speaker-homogenous segmentations,
+due to their predominently small duration, they account for the smallest proportion of individual frames.
+% artificial overlaps
+
 
 For sanity, let us refer to the paper \cite{rabiner_tutorial_1989} without the author's name.
 
