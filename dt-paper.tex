@@ -131,33 +131,37 @@ re-balancing data,
 
 % TODO: Figure out how to cite the author's names automatically
 
-Overlapping speech, also referred to as double-talk,
+Overlapping speech, also interchangeably referred to as double-talk,
 occurs when more than one speakers speak simultaneously at a given instant of time.
-This is a very common occurrence in spontaneous conversations where other participants make an utterance while a speaker is already speaking for many possible reasons,
-including non-competitive acknowledgements like “mhm" or reactions like laughing,
-or competitive interruptions like when having misjudged their turn to speak.
-In fact, the occurrence of double-talks can add to the naturalness of a conversation \cite{shriberg_spontaneous_2005,NenkovaHighFrequencyWord2008},
-and is a subject of interest in the area of Conversation Analysis while studying the ad-hoc mechanisms by which particpants manage turn-taking during a conversation.
+This is a very common occurrence in spontaneous conversations where other participants make an utterance while a speaker is already speaking with many possible intentions,
+including non-competitive acknowledgement like “mhm" or reaction like laughing,
+or competitive interruption like when having misjudged their turn to speak.
+% In fact, the occurrence of double-talks can add to the naturalness of a conversation \cite{shriberg_spontaneous_2005,NenkovaHighFrequencyWord2008},
+% and
+Its occurrence
+is a subject of interest for Conversation Analysis in studying the turn-taking management done by the participants in a conversation.
+% ad-hoc mechanisms by which particpants manage turn-taking during a conversation.
 While the frequency and duration of overlaps can vary depending on the situation,
 overlaps are quite frequent and characteristically brief (predominently smaller than 1\,second)
 during normal, spontaneous conversations.  % TODO: T [fig] for dt-distribution
-The characteristically small duration makes annotating them precisely a very expensive manual endeavor for Conversation Analysis,
+The characteristically small duration makes precisely annotating them a very expensive manual endeavor,
 while attempts to automate the process have found it to be an extremely challenging task.
 
 The flagship scenario of most automated speech technologies is of spontaneous conversations,
-and the presence of double-talks is often detrimental to the performance of such technologies when not appropriately handled.
-Speaker diarization systems, whose goal is to determine `who spoke when' in a recording with more than one speakers,
+and the presence of double-talks is often detrimental to their perfomance.
+Speaker diarization systems, whose goal is to determine `who spoke when' in a conversation,
 are penalized when they miss additional speakers in segments with overlapping speech.
 In the increasingly better state-of-the-art performance of such systems,
 this penalty has come to account for a major portion of the errors that remain,
 so much so that Anguera et al. claim overlapping speech situations to be the `Achilles heel' of speaker diarization systems when applied to recordings of meetings \cite{anguera_speaker_2012}.
-Many other speech technologies (e.g. Automatic Speech Recognition) rely on speaker homogenous segmentations produced by a speaker diarization system in a pre-processing step,
-and hence also suffer from degraded performance in situations of missed double-talks \cite{cetin_speaker_2006}.
+Many other speech technologies (e.g. Automatic Speech Recognition) rely on speaker homogenous segmentations produced by a speaker diarization system,
+and have been reported to suffer from degraded performance in situations of double-talks \cite{cetin_speaker_2006}.
 
 Perhaps consequently, most previous attempts at detecting natural double-talks in conversations have been made in lieu of improving speaker diarization systems.
 The most successful approaches propose employing a dedicated and purely acoustic overlap detection system.
-The problem has most commonly been formulated as performing frame-wise classification for the presence of either zero (i.e. silence), one, or two (or more) currently active speakers,
-and implemented in a GMM-HMM based framework while experimenting with different combinations of acoustic features.  % TODO: T [ref] for all the main ovl in diarzn studies
+The problem has most commonly been formulated as performing frame-wise classification for the presence of either
+zero (i.e. silence), one, or more than one simultaneously active speakers,
+and the solutions have been implemented in a GMM-HMM based framework while engineering different combinations of acoustic features.  % TODO: T [ref] for all the main ovl in diarzn studies
 In general, using additional features from blah, blah, blah, or blah % TODO: T [text] summarize other features
 have been found to improve overlap detection over using only spectral features.
 Geiger et al. blah blah blah  % TODO: T [text] summarize LSTM-HMM approach.
@@ -165,14 +169,102 @@ Geiger et al. blah blah blah  % TODO: T [text] summarize LSTM-HMM approach.
 The problem of overlap detection has remained unsolved
 and continues to present a steep trade-off between precision and recall of the system.
 
-The most potent source of challenge in detecting overlaps is rooted in the inherent imbalance between the three classes.
+The most potent source of challenges in detecting natural double-talks is rooted in the inherent imbalance between the three classes.
 It can be seen in Table X that in spontaneous conversations,  % TODO: T [tbl] Add table of segment and duration proportions.
 while the individual occurrences of natural overlaps constitute a significant proportion of the total number of speaker-homogenous segmentations,
 due to their predominently small duration, they account for the smallest proportion of individual frames.
-% artificial overlaps
+Some studies have attempted to solve for this issue by training their proposed systems on artificially overlapped speech.  % TODO: T [ref, search] pyknogram paper, and the recent one, and any others
+Shokouhi et al. reported better results when using their proposed Pyknograms as acoustic features for detecting overlaps under different noise conditions,
+but their evaluations showed a discouraging dip in performance when the overlaps were less than 2\,seconds long \cite{shokouhi_teager_2017}.
+In one of the recent proposals using a Deep Learning based method,
+Andrei et al. reported achieving one of the better results in detecting overlaps of 500, 100 and 25\,millisecond \textit{window durations} \cite{AndreiDetectingOverlappedSpeech2017}
+(it is unclear from the paper if this is also the temporal resolution (\textit{hop-size}) at which the predictions were made)
+when MFCCs were combined with other acoustic features as inputs to a convolutional neural network.
+However, no evaluations of such systems have been reported on real conversations and,
+for reasons discussed in Section X.x, % TODO: T [ref] to section discussing artificial data
+the expectations may not be encouraging to take this route for solving the imbalance problem.
 
+For our study, we have developed and evaluated our proposed system on naturally occurring double-talks in real telephonic conversations of the Fisher Corpus.  % TODO: T [ref] fisher paper, link
+We have limited ourselves to work with mono-aural audio recorded at a sample rate of 8000\,Hertz,
+in part forced by our choice of the dataset,
+and in part motivated by our desire for the system to be applicable to almost all recording conditions.
+Our system uses a Deep Convolutional Neural Network (DCNN) based automatic feature extractor and classifier working only on log-mel-spectrograms as inputs,
+and hence avoids the need of previously prevelant feature engineering necessary for the task.
+We present our proposals and systematic evaluation of different training strategies for solving the class imbalance issue and other inherent challenges posed by the problem.
+Furthermore, we also evaluate the imporvements to our DCNN achieved by temporally smoothing its potentially noisy predictions
+by using the Viterbi algorithm that incorporates longer-term temporal patterns that our DCNN is not able to learn on its own.
 
-For sanity, let us refer to the paper \cite{rabiner_tutorial_1989} without the author's name.
+% -------------------------------------------------------------------------------------- APPROACH -
+\section{Approach}
+Our system performs frame-wise classification of the extracted acoustic features into three classes based on the number of simultaneously speaking speakers:
+zero (silence), one, or more than one (overlap).
+For this purpose, our decision for investigating deep learning methods, and DCNNs in particular,
+was motivated by the desire to avoid the heavy feature engineering prevelant in previous works.
+Recent ground-breaking results achieved by DCNNs have been attributed to their capability of automatically learning the appropriate features for a task from almost raw inputs.
+For our approach, we used 64\,dimensional $\text{log}_{10} \text{-scaled}$ melspectrograms (filter-banks)
+extracted every 10\,milliseconds over a window of 32\,milliseconds (equivalent to 256 FFT-bins for 8000\,Hertz audio),
+which have been shown to achieve better performance than MFCCs and pure spectrograms in various deep learning based acoustic models.  % TODO: T [ref] papers about fbank vs mfcc
+For the purpose of reducing the mismatch between training and testing conditions, and as a crude noise reduction method,
+we applied cepstral mean normalization on the extracted features.
+However, we performed this on a chunk-by-chunk basis,
+where the mean vector of a contiguous chunk of audio of roughly 2.5\,minutes duration was used to center all the vectors of that chunk.
+This avoids the reliability issues with utterance level normalization by using long enough chunks,
+while also avoiding impact of unrelated outliers if it were done over the entire datatset.
+Additional variance normalization was not found to be helpful,
+which is in line with other proposals using deep architectures.  % TODO: T [ref] against variance normalization in DL
+
+The particular architecture of our DCNN is a heavily simplified version of VGG-net (Table X),  % TODO: T [ref] VGG-net
+and employs ReLU function for all activations except the final output layer's.
+Dropout and batch-normalization layers are used for regualization,
+and all trainings were performed using Adamax to optimize the categorical cross-entropy with parameters as per the original paper.  % TODO: T [ref] adamax paper
+When constructing the input to our DCNN, we add 10 frames each from immediately before and after a given frame to be classified (see inputs in Table X)  % TODO: T [tbl] DCNN arch
+with the goal to provide additional contextual information to the classifier.
+This limits the number of convolutional blocks in our architecture to when the number of temporal dimensions left is reduced to one.
+Our preliminary experiments showed that using fewer number of contextual frames gave relatively worse results,
+while larger values came at significant computational cost.
+We fixed our feature extraction pipeline and the DCNN's architecture for all our experiments in order to isolate the variables for the different training strategies discussed in later sections.
+
+% ---------------------------------------------------------------------- TACKLING CLASS IMBALANCE -
+\section{Tackling Class Imbalance}
+While deep learning methods are extremely powerful,
+they suffer from similar degradation in performance as classic approaches when the target classes are severely imbalanced.
+There have been relatively few systematic studies to solve this problem in the context of deep learning.
+Of ones that do exist, almost all have concentrated on image classification related tasks.  % TODO: T [ref,search] DL with imbalance
+Their proposals are often not so straightforward to apply on speech signals.
+We discuss these approaches in the following sections in the context of detecting overlapping speech.
+
+% --------------------------------------------------------------------------------------- DATASET -
+\subsection{Dataset}
+\outline{
+       1 [ ] DL requires large number of examples for better generalization.
+       1 [ ] AMI, etc. are not large enough
+       1 [ ] They have also been reported to be inconsistently annotated, and suffer from less than ideal recording conditions (zelenak, andrei_cnn)
+       1 [ ] The choice has been made by other studies to create artificial overlaps.
+       1 [ ] some use too clean a base dataset to create overlaps, and such systems fail on real conversations.
+       1 [ ] this could be solved for by adding additional noise during training.
+       1 [ ] Even then, it is not likely that the generated overlaps will match real ones.
+       1 [ ] There are particular utterences, intonation changes, prosody, etc. factors that often occur in regions of overlaps (that paper)
+       1 [ ] These would be very difficult to replicate in artificially created data.
+
+       1 [ ] we deliberately chose Fisher Corpus 1.
+       1 [ ] it is a large dataset, and the telephone based conversations have natural overlaps.
+       1 [ ] We only worked with ~200 hours for training and validation, ~90 hours for testing.
+       3 [ ] there is more overlap than the entire size of some dataset usage that has been reported.
+       1 [ ] The size of data available also affords certain other decisions discussed in subsequent sections.
+
+       1 [ ] However, it imposes some limitations. Our system's result is only strictly applicable to <= 2 speaker telephone based conversations
+       1 [ ] But more than 2 speakers is very rare
+       1 [ ] the telephone recording limits us to use 8khz, which is not ideal.
+       1 [ ] but it is the least common denominator scenario, and other audios can be downsampled trivially.
+       2 [ ] in fact, restricting the mel-scale to a fixed value (64 in our case), the down-sampling might not be necessary, as long as features are normalized.
+       1 [ ] technically, the recordings have two speaker specific channels, but we merged them trivially using LibROSA.
+       1 [ ] lastly, the dataset is not exactly high resolution and precise, sometimes missing gaps, leading to weird peaks in distribution, and a long tail.
+       1 [ ] This could impact reliability of evaluation, and we observed the system to be better than the available annotations, helped by the large dataset.
+       1 [ ] however, since we have independent speaker channels, we could re-annotate the data with a better SAD and retrain. We did not do this for our study.
+}
+Nevertheless, deep learning based methods necessitate a large training dataset for better generalizability of the learned models.
+This requirement becomes even more important due to the disadvantaged proportion of double-talks in the imbalanced classes.
+
 
 % ---------------------------------------------------------------------------------- BIBLIOGRAPHY -
 \bibliographystyle{IEEEtran}
