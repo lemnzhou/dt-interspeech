@@ -169,6 +169,56 @@ Our preliminary experiments showed that using fewer number of contextual frames 
 while larger values came at significant computational cost.
 We fixed our feature extraction pipeline and the DCNN's architecture for all our experiments in order to isolate the variables for the different training strategies discussed in later sections.
 
+The frame-wise class posteriors class posteriors produced by our DCNN cannot exploit longer-term temporal patterns inherent to this problem with respect to typical duration of segments,
+their probability of occurrence, etc.
+The `raw' predictions obtained by simply applying frame-wise $argmax$ on the posteriors were observed to be noisy.
+We therefore also experimented with applying the Viterbi algorithm \cite{rabiner_tutorial_1989} for decoding a temporally `smoothed' final segmentation and report its impact here.
+The prior- and transition-probabilties used by the algorithm were calculated calculated on the training dataset and,
+being class posteriors, the emission-probabilties were set to $1$.
+Unlike most previous works,  % TODO: T [ref] papers that use OIP || non-ergodic HMM
+we did not use an overlap-insertion penalty or manually modify the calculated probabilities.
+
+% --------------------------------------------------------------------------------- TBL:DCNN-ARCH -
+\begin{table}[t] \label{tbl:dcnn-arch}
+  \caption{Architecture of the DCNN, and layers in each block.}
+  \centering
+  \begin{tabular}{ll}
+    \toprule
+    \textbf{Block}    & \textbf{Output's Shape}                         \\
+                      & \tiny{(time, frequency, channel) or (size, )}   \\ \midrule
+    Inputs            & (21, 64, 1)                                     \\ \midrule
+    ConvBlk 1         & (9, 31, 64)                                     \\
+    ConvBlk 2         & (3, 14, 128)                                    \\
+    ConvBlk 3         & $\text{(256, )}^{\text{\tiny{global pooling}}}$ \\ \midrule
+    FCBlk 1           & (512, )                                         \\
+    FCBlk 2           & (128, )                                         \\
+    FCBlk 3           & (32, )                                          \\ \midrule
+    Outputs           & $\text{(3, )}^{\text{\tiny{softmax}}}$          \\
+    \bottomrule
+  \end{tabular}
+  \begin{footnotesize}
+    \begin{tabular}{l}
+      \toprule
+      \textbf{ConvBlk}   \\ \midrule
+      Conv2D: (3, 3)     \\
+      BatchNorm          \\
+      ReLU               \\
+      Dropout:  0.1      \\
+      MaxPool2D: (2, 2)  \\
+      \bottomrule
+    % \end{tabular}
+    % \begin{tabular}{l}
+                         % \\
+      \toprule
+      \textbf{FCBlk}     \\ \midrule
+      Dense              \\
+      ReLU               \\
+      Dropout:  0.1      \\
+      \bottomrule
+    \end{tabular}
+  \end{footnotesize}
+\end{table}
+
 % ---------------------------------------------------------------------- TACKLING CLASS IMBALANCE -
 \section{Tackling Class Imbalance}
 While deep learning methods are extremely powerful,
