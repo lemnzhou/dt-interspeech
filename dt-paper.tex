@@ -146,7 +146,7 @@ by using the Viterbi algorithm that incorporates longer-term temporal patterns t
 % -------------------------------------------------------------------------------------- APPROACH -
 \section{Approach}
 Our system performs frame-wise classification of the extracted acoustic features for a mono-aural audio into three classes based on the number of simultaneously speaking speakers:
-zero (silence), one, or more than one (overlap).
+zero (silence) $(no)$, one $(sp)$, or more than one (overlap) $(ov)$.
 For our approach, we used 64\,dimensional $\text{log}_{10} \text{-scaled}$ melspectrograms (filter-banks)
 extracted every 10\,milliseconds over a window of 32\,milliseconds (equivalent to 256 FFT-bins for 8000\,Hertz audio),
 which have been shown to achieve better performance than MFCCs and pure spectrograms in various deep learning based acoustic models.  % TODO: T [ref] papers about fbank vs mfcc
@@ -180,18 +180,18 @@ We discuss these approaches in the following sub-sections within the context of 
 
 % --------------------------------------------------------------------------------------- DATASET -
 \subsection{Dataset}
-%TODO: [text] mention more clearly why dataset choice helps in tackling class imbalance
+%TODO: T [text] mention more clearly why dataset choice helps in tackling class imbalance
 %             - natural vs. artificial overlaps
 %             - large dataset, affording certain decisions that would be otherwise restricted
-Previous works have on detecting overlapping speech in conversations have used data from meetings in datasets like AMI, NIST RT, ICSI, and others.  % TODO: [ref] to meeting datasets
+Previous works have on detecting overlapping speech in conversations have used data from meetings in datasets like AMI, NIST RT, ICSI, and others.  % TODO: T [ref] to meeting datasets
 While they are appropriate, and perhaps the flagship scenario for evaluation,
 these datasets pose extra challenging due to inconsistent and difficult recording conditions.
 Previous works have reported to utilize only a subset of these datasets,
-often to be comparable to other works,  % TODO: [ref] papers that use meeting dataset for consistency
+often to be comparable to other works,  % TODO: T [ref] papers that use meeting dataset for consistency
 or due to limitations imposed by these conditions,
 whose size we believed was not enough to appropriately train a DCNN with different strategies to handle the class-imbalance issue.
-We decided to instead perform our study using the Fisher Corpus (Part 1),  % TODO: [ref] Fisher paper
-which consists of 5,850 telephone based conversations (amounting to more than 960\,hours) and is predominently used in conversational and large vocabulary speech recognition tasks in literature.  %TODO: [ref] papers using Fisher
+We decided to instead perform our study using the Fisher Corpus (Part 1),  % TODO: T [ref] Fisher paper
+which consists of 5,850 telephone based conversations (amounting to more than 960\,hours) and is predominently used in conversational and large vocabulary speech recognition tasks in literature.  %TODO: T [ref] papers using Fisher
 Most of these conversations have naturally occurring double-talks,
 and the shear size of the available data makes certain simpler decisions later more affordable.
 However, we limited ourselves to using only roughly 200\,hours of the dataset during trainings
@@ -201,7 +201,7 @@ mainly restricted by the training times for a DCNN.
 
 Nevertheless, the Fisher Corpus imposes certain limitations of its own.
 Being a telephone based conversation, the maximum number of overlapping speakers is strictly limited to two.
-However, this scenario covers the majority of double-talk situations even when there are more than two participants.  % TODO: [ref] Zelenak
+However, this scenario covers the majority of double-talk situations even when there are more than two participants.  % TODO: T [ref] Zelenak
 All audios are sampled at 8,000\,Hertz, which could be a disadvantage,
 but it is easier to reliably downsample audios of higher quality than doing the opposite.
 In fact, by using mel-scaling with a fixed number of 64\,filter-banks,
@@ -215,7 +215,7 @@ our system is applicable to most scenarios.
 
 The most important problem with the dataset is the relative imprecision in annotation of the utterance boundaries.
 As per the documentation,
-these boundaries were not manually modified after they were determined by a speech activity detection system.   % TODO: [ref] Fisher corpus
+these boundaries were not manually modified after they were determined by a speech activity detection system.   % TODO: T [ref] Fisher corpus
 The properties of this speech activity detection system have not been mentioned,
 but we found them to be less precise than ideal, especially in regions of small gaps.
 These inaccuracies do not impact ASR systems as much as they would a system that needs to temporally localize events in the audio.
@@ -223,12 +223,132 @@ A powerful enough DCNN, when a large enough dataset is available to learn from,
 may however be robust to such lack of precision,
 and we did indeed observe this in many of our experiments.
 Such inaccuracies exist in other datasets as well,
-but they do not offer as much data for a deep learning method to learn from comfortably,
+but they do not offer as much data for a deep learning method to comfortably learn from,
 motivating us further to use the Fisher Corpus.
-Nonetheless, these inaccuracies can adversely impact the summary metrics used for evaluating the system, including the ones reported here.
+Nonetheless, these inaccuracies perhaps explain the peaks and tails in the segment length distribution in Figure X,  % TODO: T [fig] ovl segment dist
+and can adversely impact the summary metrics used for evaluating the system, including the ones reported here.
 We did not, however, modify the annotations before using them for the experiments reported here,
 but we strongly recommend using a better speech activity detector to improve the available utterance boundaries for future works in this direction.
 
+% -------------------------------------------------------------------- RE-BALANCING TRAINING DATA -
+\subsection{Re-balancing Training Data}
+The most common approach to tackle imbalanced classes is to rebalance the dataset that is seen by the system during training,
+by either oversampling from the minority classes or undersampling from the majority classes.
+When the available dataset is limited, oversampling the minority class is the most prevelant method,
+and is often done by creating new examples of the minority class by transforming the existing examples in a way that is irrelevant to the task at hand (e.g. flipping an image) or other more sophisticated methods (e.g. SMOTE) to avoid overfitting.  % TODO: T [ref] paper on re-balancing, SMOTE
+Such transformations are not straightforward to perform on audio signals.
+Nevertheless, afforded by the size of the dataset available to us,
+we instead chose to instead only evaluate undersampling the majority class during training for one of our experiments.
+For this, we skipped frames with a single speaker's speech uniformly randomly when preparing the inputs for the DCNN,
+such that the final ratio between single speech frames to overlapping speech was two-to-one
+(we removed silence frames entirely when undersampling as explained in Section X.x).  % TODO: T [ref] removing silence section.
+We chose the ratio to be two-to-one instead of one-to-one as an approximate method for presenting the DCNN with equal number of frames for each speaker alone and when overlapped.
+A more sophisticated method for undersampling involves preferring examples of the majority near the boundaries with the minority class,
+but we did not do this due to the imprecision in the boundary annotations (in most datasets).
+
+% ------------------------------------------------------------------------------ REMOVING SILENCE -
+\subsection{Removing Silence} \label{sec:rm-silence}
+Silence, or lack of speech, is more easily discriminable than speech from any number of speakers,
+whereas discriminating between speech produced by a single speaker and that produced by multiple speakers simultaneously, even in isolation, can prove difficult.
+This problems becomes more severe due the imbalance disadvantaging overlapping speech more.
+While training neural networks, this may result in situations where the classifier gets stuck in a steep local minima that is irrelevant, or even disadvantageous to double-talk detection.
+Furtheremore, silence detection can be done by using much simpler methods than an expensive DCNN.  % IDEA: T [search,ref] more recent and better performing silence detection
+Therefore, similar to many other previous works,  % TODO: T [ref] DT papers skipping silence
+for a set of the experiments reported here,
+we removed silence from the training objective based on the ground-truth label.
+During evaluations of these experiments,
+to enable temporal smoothing (Section X),  % TODO: T [ref] temporal smoothing section
+we explicitly set the silence frames of the DCNN to be perfect predictions based on the ground-truth label,
+instead of using an automated speech detector, to isolate the variables under study.
+
+% ----------------------------------------------------------------------------------------- OTHER -
+\subsection{Other}
+Moving the threshold for assigning a class based on its priors is another method to tackle class imbalance.
+Unfortunately, our experiments with this method were unstable and unreliable enough to be inconclusive, and hence are not reported here.
+Perhaps this was due to the imbalance being too steep over a relatively few number of classes.
+Another method is to modify the loss function during training based on misclassification penalties.
+However, for stochastic gradient descent based deep learning,
+this method is equivalent in impact to naive rebalancing of the training data,  % TODO: T [search,ref] cost-sensitive objective is rebalancing
+and hence we did not investigate this method in our study.
+
+% ----------------------------------------------------------------------------------- EXPERIMENTS -
+\section{Experiments}
+In the presence of imbalance, classwise precision and recall are more informative metrics than common measures like overall accuracy.
+We report these metrics of the raw and smoothed segmentations at the frame level for all classes together so that any degradations in performance for other classes in strategies to improve the results on a particular target can be detected more clearly.
+All evaluations were performed on the independent set of calls worth roughly 91\,hours of conversations as specified earlier.
+
+In our preliminary experiments with several deep learning architectures and parameters,
+we observed certain recognizable degenerate cases where the system failed to detect double-talks satisfactorily.
+Some of the least powerful architectures predicted all fames to contain speech from a single speaker $(ov)$,
+often with posterior probability as $1$, where not even temporal-smoothing could recover a useable result.
+This is the classic case where a metric like overall accuracy would have mislead one severely.
+A common degenerate case with moderately powerful architectures was where the system would perform robustly in detecting silence frames $(no)$ but will never detect any double-talk frames $(ov)$.
+This unexpected speech activity detector demonstrated the extra disadvantage $(ov)$ face when $(no)$ is kept as part of the training objective, as discussed in Section\,\ref{sec:rm-silence}.
+When some measures like threshold-moving were applied to tackle the class imbalance,
+a common degenerate case involved extremely low precision for the $(ov)$ from what amounted to be random decisions for a frame to be from a single speaker $(sp)$ or multiple speakers $(ov)$.
+Interestingly, in cases where silence was kept as part of the training objective,
+this catastrophic level confusion still almost exclusively occurred between $(sp)$ and $(ov)$,
+indicated by both a low precision for $(ov)$ ($P^{(ov)}$) and lower than 70\% recall for $(sp)$ ($R^{(sp)}$).
+
+For a baseline performance measure of the proposed DCNN here,
+we trained the system for 20 passes over the training set without rebalancing the classes and also kept silence as part of the training objective.
+As tabulated in Table X,  % TODO: T [tbl,ref] table of all results
+this baseline system did not detect silence frames with good precision $P^{(no)}$ resulting in many false-positives,
+possibly due to the inadequacy of our crude denoising procedure.
+This proved taxing for detecting double-talks, resulting in unsatisfactory recall $R^{(ov)}$,
+perhaps due to the increased competition from silence of varying noise conditions.
+However, the good precision of detecting overlaps $P^{(ov)}$ indicates that the DCNN did find some of the appropriate features representing double-talk situations.
+The application of temporal smoothing improved $P^{(no)}$ and $P^{ov}$ by either removing impossibly short segments from the raw predictions or by filling in certain gaps (Figure X),  % IDEA: T [fig] true, raw, smoothed preds for baseline
+but this also removed some otherwise correctly predicted frames, mostly disadvantaging $R^{(ov)}$ further.
+
+We then trained the same DCNN for 20 passes over the same imbalanced training set,
+but did not show it any silence frames, effectively removing it from the training objective and turning it into a binary classifier.
+During evaluation, the silence frames were not removed from the input but,
+interestingly enough, over the 91\,hours of our testing set,
+none of the silence frames were detected as overlaps,
+strongly suggesting that the DCNN had learned learned features that were specific to double-talks alone.
+This resulted in improvements in $R^{(ov)}$, but came at a significant cost to $P^{(ov)}$ for the raw decisions.
+The silence frames were manually set to perfect predictions to allow for temporal smoothing with the Viterbi algorithm,
+and this smoothing regained the lost $P^{(ov)}$ with a relatively smaller cost to $R^{(ov)}$ than in the previous experiment.
+
+For the final experiment presented here,
+we trained our DCNN for 40 passes with a uniformly randomly undersampled single-speaker class as explained previously, while also removing silence from the training objective.
+We doubled the number of passes for this experiment over the previous ones to avoid any under-fitting of the single-speaker class.
+The evaluation of this DCNN on the testing set (which was obviously not rebalanced) showed an encouraging improvement in $R^{(ov)}$,
+but with discouragingly high number of false positives in the raw predictions calculated with a naive $argmax$.
+We however observed that most of these false positives occurred as noisy, impossibly short segments,
+which were very adequately removed by the temporal smoothing procedure,
+leading to a substantial improvement in $P^{(ov)}$ at a still smaller relative cost to $R^{(ov)}$.
+
+% ----------------------------------------------------------------------------------- CONCLUSIONS -
+\section{Conclusions}
+We have demonstrated the possibility of using a DCNN for detecting natural double-talk by appropriately training on real conversations.
+The challenge of class imbalance disadvantaging double-talks comes inherently with the use of real conversations for training.
+Even without handling for this challenge, our DCNN learned some relevant features for double-talks,
+demonstrating the power of this deep learning method.
+We also showed that, in line with previous works,
+removing silence from the training objective is useful in reducing the disadvantage against double-talks.
+But the most benefitial strategy was to rebalance the training dataset.
+
+The DCNN is capable of automatically learning the appropriate features for the task from the relatively low-level log-scaled melspectrograms, hence avoiding any heavy feature engineering.
+Our decision to use the Fisher Corpus not only provided us with a large dataset for training and evaluation,
+but also afforded us to choose random under-sampling of the majority class as the strategy for rebalancing the training data.
+We believe that a system trained using this dataset and strategy is more readily and performantly applicable to detecting real conversations than one trained on artificial data.
+A large enough dataset with higher quality audio and annotations would be better,
+but we expect it to be an expensive one to acquire, if not build.
+
+The performance our DCNN, however, is still less than ideal.
+We expect a more powerful DCNN architecture to perform better for the problem.
+However, we also demonstrated the weakness of DCNNs in exploiting longer-term temporal patterns by reporting the improvements achieved by temporal smoothing of the posteriors using the Viterbi algorithm.
+We therefore expect improvements in performance by architectures that are capable of learning such patterns automatically (e.g. recurrent neural networks),
+and perhaps even better when combined with convolutional neural networks based feature extractors.
+
+The apparently steep trade-off between precision and recall that are the hall-mark of working with such heavily imbalanced classes was seen in the results very clearly.
+There is a lack of comprehensive studies for tackling class imbalance when using deep learning,
+especially in tasks related to speech technologies.
+The task of detecting natural double-talks, as yet remaining an unsolved problem,
+could be a worthwhile candidate for such studies,
+if not also benefitting speech technologies that suffer in situations of overlapping speech.
 
 % ---------------------------------------------------------------------------------- BIBLIOGRAPHY -
 \bibliographystyle{IEEEtran}
