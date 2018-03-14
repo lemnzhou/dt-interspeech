@@ -96,6 +96,26 @@ this penalty has come to account for a major portion of the errors that remain,
 so much so that Anguera et al. claim overlapping speech situations to be the `Achilles heel' of speaker diarization systems when applied to recordings of meetings \cite{anguera_speaker_2012}.
 Many other speech technologies (e.g. Automatic Speech Recognition) rely on speaker homogenous segmentations produced by a speaker diarization system,
 and have been reported to suffer from degraded performance in situations of double-talks \cite{cetin_speaker_2006}.
+% ---------------------------------------------------------------------------------- FIG:DT-DIST -
+\begin{figure}[t] \label{fig:dt-dist}
+  \centering
+  \includegraphics[width=\linewidth]{figures/dt-dist.png}
+  \caption{Weighted histogram of durations of segments with double-talk in the Fisher English Corpus (Part 1).}
+\end{figure}
+
+% ------------------------------------------------------------------------------- tbl:actspk-perc -
+\begin{table}[th] \label{tbl:actspk-perc}
+  \caption{Percentage of segments and frames with different number of simultaneously active speakers in the $\sim \!\!\! \text{961\,hours}$ of Fisher English Corpus (Part 1).}
+  \centering
+  \begin{tabular}{crr}
+    \toprule
+    \textbf{Active Speakers}  & \textbf{Segments (\%)}  & \textbf{Frames (\%)}  \\ \midrule
+    0                         & 20.39                   &  6.86                 \\
+    1                         & 50.93                   & 79.61                 \\
+    2                         & 28.68                   & 13.53                 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 Perhaps consequently, most previous attempts at detecting natural double-talks in conversations have been made in lieu of improving speaker diarization systems.
 The most successful approaches propose employing a dedicated and purely acoustic overlap detection system.
