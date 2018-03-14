@@ -345,9 +345,13 @@ and hence we did not investigate this method in our study.
 
 % ----------------------------------------------------------------------------------- EXPERIMENTS -
 \section{Experiments}
-In the presence of imbalance, classwise precision and recall are more informative metrics than common measures like overall accuracy.
-We report these metrics of the raw and smoothed segmentations at the frame level for all classes together so that any degradations in performance for other classes in strategies to improve the results on a particular target can be detected more clearly.
-All evaluations were performed on the independent set of calls worth roughly 91\,hours of conversations as specified earlier.
+% ---------------------------------------------------------------------------- FIG:RAW-SMTH-PREDS -
+\begin{figure*}[t] \label{fig:raw-smth-preds}
+  \centering
+  \includegraphics[width=0.8\linewidth]{figures/raw-smth-preds.png}
+  \caption{True labels, raw-, and smoothed-predictions for part of a conversation, after training on rebalanced inputs.}
+  \vspace*{-\baselineskip}
+\end{figure*}
 
 % ---------------------------------------------------------------------------------- TBL:RESULTS -
 \begin{table}[t] \label{tbl:results}
@@ -368,6 +372,10 @@ All evaluations were performed on the independent set of calls worth roughly 91\
   \end{tabular}
   \vspace*{-\baselineskip}
 \end{table}
+
+In the presence of imbalance, classwise precision and recall are more informative metrics than common measures like overall accuracy.
+We report these metrics of the raw and smoothed segmentations at the frame level for all classes together so that any degradations in performance for other classes in strategies to improve the results on a particular target can be detected more clearly.
+All evaluations were performed on the independent set of calls worth roughly 91\,hours of conversations as specified earlier.
 
 In our preliminary experiments with several deep learning architectures and parameters,
 we observed certain recognizable degenerate cases where the system failed to detect double-talks satisfactorily.
