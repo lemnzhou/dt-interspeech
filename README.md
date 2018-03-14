@@ -1,7 +1,7 @@
 # Detecting Double-Talks (Overlapping Speech) in Conversations using Deep Learning
-## Interspeech 2018 Paper
+## Interspeech 2018 Paper (Hopeful)
 
-No `.pdf` file is being tracked. 
+No `.pdf` file is being tracked.
 
 For now, try running `make all` with a few fingers crossed.
 
