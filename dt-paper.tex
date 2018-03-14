@@ -103,7 +103,7 @@ and have been reported to suffer from degraded performance in situations of doub
   \caption{Weighted histogram of durations of segments with double-talk in the Fisher English Corpus (Part 1).}
 \end{figure}
 
-% ------------------------------------------------------------------------------- tbl:actspk-perc -
+% ------------------------------------------------------------------------------- TBL:ACTSPK-PERC -
 \begin{table}[th] \label{tbl:actspk-perc}
   \caption{Percentage of segments and frames with different number of simultaneously active speakers in the $\sim \!\!\! \text{961\,hours}$ of Fisher English Corpus (Part 1).}
   \centering
@@ -115,6 +115,7 @@ and have been reported to suffer from degraded performance in situations of doub
     2                         & 28.68                   & 13.53                 \\
     \bottomrule
   \end{tabular}
+  \vspace*{-\baselineskip}
 \end{table}
 
 Perhaps consequently, most previous attempts at detecting natural double-talks in conversations have been made in lieu of improving speaker diarization systems.
@@ -237,6 +238,7 @@ we did not use an overlap-insertion penalty or manually modify the calculated pr
       \bottomrule
     \end{tabular}
   \end{footnotesize}
+  \vspace*{-\baselineskip}
 \end{table}
 
 % ---------------------------------------------------------------------- TACKLING CLASS IMBALANCE -
@@ -346,6 +348,26 @@ and hence we did not investigate this method in our study.
 In the presence of imbalance, classwise precision and recall are more informative metrics than common measures like overall accuracy.
 We report these metrics of the raw and smoothed segmentations at the frame level for all classes together so that any degradations in performance for other classes in strategies to improve the results on a particular target can be detected more clearly.
 All evaluations were performed on the independent set of calls worth roughly 91\,hours of conversations as specified earlier.
+
+% ---------------------------------------------------------------------------------- TBL:RESULTS -
+\begin{table}[t] \label{tbl:results}
+  \caption{Class-wise precision $P$ and recall $R$ after different strategies, using $argmax$ `raw' or smoothed `smth` decoding.}
+  \centering
+  % \begin{tabular}{rrrrrrr}
+  \begin{tabular}{ccccccc}
+    \toprule
+                & \multicolumn{2}{c}{\textbf{Baseline}}  & \multicolumn{2}{c}{\textbf{w/o Silence}}   & \multicolumn{2}{c}{\textbf{Rebalanced}}   \\
+                &         raw      &         smth        &         raw      &         smth            &         raw      &         smth           \\ \midrule
+    $P^{(no)}$  &         19.43    &         20.90       &         --       &         --              &         --       &         --             \\
+    $R^{(no)}$  &         88.09    &         89.10       &         --       &         --              &         --       &         --             \\ \midrule
+    $P^{(sp)}$  &         86.45    &         85.92       &         86.83    &         86.48           &         89.12    &         88.91          \\
+    $R^{(sp)}$  &         82.15    &         83.61       &         99.05    &         99.79           &         88.39    &         96.69          \\ \midrule
+    $P^{(ov)}$  & \textbf{81.30}   & \textbf{91.76}      & \textbf{68.87}   & \textbf{88.13}          & \textbf{35.25}   & \textbf{60.46}         \\
+    $R^{(ov)}$  & \textbf{ 7.89}   & \textbf{ 5.05}      & \textbf{12.22}   & \textbf{ 8.82}          & \textbf{36.93}   & \textbf{29.55}         \\
+    \bottomrule
+  \end{tabular}
+  \vspace*{-\baselineskip}
+\end{table}
 
 In our preliminary experiments with several deep learning architectures and parameters,
 we observed certain recognizable degenerate cases where the system failed to detect double-talks satisfactorily.
