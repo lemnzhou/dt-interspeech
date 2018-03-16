@@ -48,17 +48,19 @@ We demonstrate training a Deep Convolutional Neural Network (DCNN) for this task
 We propose using the real conversational data from the Fisher English Corpus to properly train the DCNN while maintaining and testing its applicability to real conversational scenarios.
 To alleviate the then imposed challenge of severe class-imbalance, we report the improvements achieved by removing silence from the training objective and uniformly randomly under-sampling the majority class during training.
 Simultaneously, we perform temporal smoothing using the Viterbi algorithm to enhance the final segmentation.
-With more than 60\%~precision and more than 29\%~recall over more than 91~hours of conversations, our results demonstrate the applicability of DCNNs for this task with straightforward avenues for future works.
+With more than 60\%~precision and more than 29\%~recall over more than 91~hours of conversations, our results demonstrate the applicability of deep learning for this task and, using our modular and open-sourced RENNET framework,
+straightforward avenues for future works in this direction.
 
 \end{abstract}
 
 % ----------------------------------------------------------------------------------- INDEX TERMS -
-\noindent\textbf{Index Terms}:
-overlapping-speech detection,
-speech segmentation,
+\noindent\textbf{Index Terms}: %
+overlapping-speech,
 deep convolutional neural network,
 conversation analysis,
-class-imbalance issue,
+speech segmentation,
+class-imbalance,
+deep learning.
 
 % ---------------------------------------------------------------------------------- INTRODUCTION -
 \section{Introduction}
