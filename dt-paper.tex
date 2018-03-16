@@ -156,7 +156,7 @@ presents a characteristically steep trade-off between precision and recall of th
 
 The most potent source of challenges in learning to detect double-talks from real conversations
 is rooted in the inherent imbalance between the three classes.
-It can be seen in Table \ref{tbl:actspk-perc} that in spontaneous conversations,
+Demonstrated in Table~\ref{tbl:actspk-perc}, in spontaneous conversations,
 while the individual segments with overlaps constitute a significant proportion of the total,
 due to their predominently small duration,
 they account for the smallest proportion of individual (10~ms) frames.
@@ -166,7 +166,7 @@ but their evaluations showed a discouraging dip in performance when the overlaps
 Similarly limitated temporal resolutions were reported by Andrei et al. for their previous works on a related task,
 but in one of their recent proposals using a Deep Learning based method,
 Andrei et al. reported achieving one of the better results in detecting overlaps of
-500, 100 and 25\,ms \textit{window durations} \cite{AndreiDetectingOverlappedSpeech2017}
+500,~100~and~25~ms \textit{window durations} \cite{AndreiDetectingOverlappedSpeech2017}
 (it is unclear from the paper if this is also the temporal resolution, i.e. the \textit{hop-size}, at which the predictions were made, neither is the distribution of the lengths of overlaps).
 They combined MFCC with three other acoustic features to train a convolutional neural network.
 However, no evaluations of such systems have been reported on detecting natural double-talks in real conversations,
@@ -193,13 +193,13 @@ Therefore, we have developed and evaluated our proposed system on real conversat
 It uses a DCNN based automatic feature extractor and classifier working only on
 log-scaled Mel-spectrograms as inputs,
 and hence avoids the need for manual feature engineering
-(Section \ref{sec:approach}).
-We limited ourselves to work with mono-aural audio with a sample rate of 8~kHz,
+(Section~\ref{sec:approach}).
+We limited ourselves to work with mono-aural audios with sampling-rate of 8~kHz,
 partly forced by our choice of the dataset,
 but mainly motivated by our desire for the system to be applicable to almost any recording setup
-(Section \ref{sec:dataset}).
-Here we describe effective training strategies for counteracting the class imbalance issue
-(Section \ref{sec:imbalance}) and evaluate their impact (Section \ref{sec:eval}).
+(Section~\ref{sec:dataset}).
+Here we describe effective training strategies for counteracting the class-imbalance
+(Section~\ref{sec:imbalance}) and evaluate their impact (Section~\ref{sec:eval}).
 % alongside the benefits of temporal smoothing using Viterbi algorithm .
 
 % -------------------------------------------------------------------------------------- APPROACH -
