@@ -44,8 +44,8 @@
        - factual but comprehensive.
 }
 Segmenting natural occurrences of overlapping speech in real conversations has proven to be an extremely difficult challenge, demanding heavy feature engineering, or controlled studies using artificial data.
-We demonstrate training a Deep Convolutional Neural Network (DCNN) for this task, affording us to use relatively low-level log-scaled Mel-spectrograms from mono-aural recordings, one of the most difficult scenarios for this task.
-We propose using the real conversational data from the Fisher English Corpus to properly train the DCNN while maintaining and testing its applicability to real conversational scenarios.
+We demonstrate training a Deep Convolutional Neural Network (DCNN) for this task, affording us to use relatively low-level log-scaled Mel-spectrograms from only mono-aural audio, one of the most difficult scenarios for this task.
+We propose using the real conversational data from the Fisher English Corpus to properly train the DCNN while maintaining and testing its generalizability to real conversational scenarios.
 To alleviate the then imposed challenge of severe class-imbalance, we report the improvements achieved by removing silence from the training objective and uniformly randomly under-sampling the majority class during training.
 Simultaneously, we perform temporal smoothing using the Viterbi algorithm to enhance the final segmentation.
 With more than 60\%~precision and more than 29\%~recall over more than 91~hours of conversations, our results demonstrate the applicability of deep learning for this task and, using our modular and open-sourced RENNET framework,
@@ -54,7 +54,7 @@ straightforward avenues for future works in this direction.
 \end{abstract}
 
 % ----------------------------------------------------------------------------------- INDEX TERMS -
-\noindent\textbf{Index Terms}: %
+\noindent\textbf{Index Terms}:
 overlapping-speech,
 deep convolutional neural network,
 conversation analysis,
@@ -266,6 +266,7 @@ We discuss these approaches in the following sub-sections within the context of 
 \subsection{Dataset}
 %TODO: T [text] mention more clearly why dataset choice helps in tackling class imbalance
 %             - natural vs. artificial overlaps
+%             - sources are already separated, helping future more precise annotations
 %             - large dataset, affording certain decisions that would be otherwise restricted
 % TODO: [text] mention ovl percentages in training and test
 Previous works have on detecting overlapping speech in conversations have used data from meetings in datasets like AMI, NIST RT, ICSI, and others.  % TODO: T [ref] to meeting datasets
