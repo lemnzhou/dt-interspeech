@@ -81,25 +81,24 @@ deep learning.
 
 Overlapping speech, interchangeably referred to as double-talk in this paper,
 occurs when more than one speakers speak simultaneously at a given instant.
-A common occurrence in spontaneous conversations,
+It is a common occurrence in spontaneous conversations when
 other participants often utter something while a speaker is already speaking,
 possibly to demonstrate non-competitive acknowledgement (e.g. “mhm") or reaction (e.g. laughing),
 or competitively interrupt having misjudged their turn to speak.
 Its occurrence is of interest for Conversation Analysis in studying the
 turn-taking management done by the participants of a conversation.
-% ad-hoc mechanisms by which particpants manage turn-taking during a conversation.
 While the frequency and durations of overlaps can vary depending on the situation,
 overlaps are quite frequent and characteristically brief (predominently smaller than 1~sec)
-during normal, spontaneous conversations (Figure~\ref{fig:dt-dist}),
+during normal spontaneous conversations (Figure~\ref{fig:dt-dist}),
 making their manual annotation expensive and automatic detection challenging.
 
 In the flagship scenario of spontaneous conversations,
 the presence of double-talks is often detrimental to most automated speech technologies.
 Speaker diarization systems, whose goal is to determine `who spoke when' in a conversation,
 are penalized when they miss additional speakers during overlaps.
-This penalty has become a major portion of the errors in the increasingly better
+This penalty has become a major portion of the errors that remain in the
 state-of-the-art performance of such systems,
-so much so that Anguera et al. claim overlapping speech situations to be the `Achilles heel' of
+so much so that Anguera et al. claimed overlapping speech situations to be the `Achilles heel' of
 speaker diarization systems when applied to meetings \cite{anguera_speaker_2012}.
 Many other speech technologies (e.g. Automatic Speech Recognition)
 rely on the speaker homogenous segmentations produced by a diarization system,
@@ -111,27 +110,58 @@ and have been reported to suffer from degaradation as well \cite{cetin_speaker_2
   \includegraphics[width=\linewidth]{figures/dt-dist.png}
   \caption{Weighted histogram of durations of segments with double-talk in the Fisher English Corpus (Part 1).}
   \label{fig:dt-dist}
+  \vspace*{-\baselineskip}
 \end{figure}
 
-Perhaps consequently, most previous attempts at detecting natural double-talks in conversations
-have been made in lieu of improving speaker diarization systems.
-% The most successful approaches propose employing a dedicated overlap detection system.
+Perhaps consequently, most previous attempts at detecting natural double-talks in real conversations
+have been made in the speaker diarization community.
 The problem has most commonly been formulated as performing frame-wise classification
 for the presence of either
 zero (i.e. silence), one, or more than one simultaneously active speakers,
-and the solutions have been implemented in a GMM-HMM based framework
+and the solutions have been implemented in a GMM-HMM framework
 while engineering different combinations of acoustic features.
-In general, using additional features from blah, blah, blah, or blah % TODO: T [text] summarize other features
-have been found to improve overlap detection over using only spectral features.
-Geiger et al. blah blah blah  % TODO: T [text] summarize LSTM-HMM approach.
-The problem of overlap detection has remained largedly unsolved and
-continues to present a steep trade-off between precision and recall of the system.
+In general, using additional, higher-level features like
+diarization posteriors' entropy \cite{boakye_overlapped_2008},
+TDOA cross-correlation from mutliple microphones \cite{zelenak_simultaneous_2012},
+prosodic attributes \cite{zelenak_speaker_2012},
+energy ratios of speaker-specific CNSC bases \cite{vipperla_speech_2012,geiger_speech_2012-1},
+multi-pitch detection \cite{charlet_impact_2013},
+and long-term statistics of gaps and speaker-changes \cite{yella_overlapping_2014}
+have been found to improve overlap detection (and consequently diarization)
+over using only spectral features like MFCC, RMS, LPC, spectral flatness, flux, kurtosis, etc.
+alone or in different combinations, when evaluated on different meeting corpora.
+In early uses of deep learning,
+Zelen\'{a}k et al. employed a DNN for dimensionality reduction of their TDOA cross-correlation features \cite{zelenak_simultaneous_2012},
+while Geiger et al. used an LSTM-based regressor,
+which was trained on various acoustic features, in a tandem setting \cite{geiger_detecting_2013},
+both effectively using them as additional features to a GMM-HMM based detector.
+Geiger et al., however, also reported that their LSTM alone performed comparably to the GMM-HMM by simply thresholding the regressor's outputs \cite{geiger_detecting_2013}.
+Nevertheless, the problem of overlap detection in real conversations has remained unsolved and
+presents a characteristically steep trade-off between precision and recall of the system.
 
-The most potent source of challenges in detecting natural double-talks is rooted in the inherent imbalance between the three classes.
-It can be seen in Table X that in spontaneous conversations,  % TODO: T [tbl] Add table of segment and duration proportions.
-while the individual occurrences of natural overlaps constitute a significant proportion of the total number of speaker-homogenous segmentations,
-due to their predominently small duration, they account for the smallest proportion of individual frames.
-Some studies have attempted to solve for this issue by training their proposed systems on artificially overlapped speech.  % TODO: T [ref, search] pyknogram paper, and the recent one, and any others
+% ------------------------------------------------------------------------------- TBL:ACTSPK-PERC -
+\begin{table}[t]
+  \caption{Percentage of segments and frames with different number of simultaneously active speakers in the $\sim \!\!\! \text{961~hours}$ of Fisher English Corpus (Part 1), demonstrating the imbalance.}
+  \centering
+  \begin{tabular}{crr}
+    \toprule
+    \textbf{Active Speakers}  & \textbf{Segments (\%)}  & \textbf{Frames (\%)}  \\ \midrule
+    0 -- $(no)$               & 20.39                   &  6.86                 \\
+    1 -- $(sp)$               & 50.93                   & 79.61                 \\
+    2 -- $(ov)$               & 28.68                   & 13.53                 \\
+    \bottomrule
+  \end{tabular}
+  \label{tbl:actspk-perc}
+  \vspace*{-\baselineskip}
+\end{table}
+
+The most potent source of challenges in learning to detect double-talks from real conversations
+is rooted in the inherent imbalance between the three classes.
+It can be seen in Table \ref{tbl:actspk-perc} that in spontaneous conversations,
+while the individual segments with overlaps constitute a significant proportion of the total,
+due to their predominently small duration,
+they account for the smallest proportion of individual frames.
+Some studies have attempted to solve this issue by training on artificially overlapped speech.
 Shokouhi et al. reported better results when using their proposed Pyknograms as acoustic features for detecting overlaps under different noise conditions,
 but their evaluations showed a discouraging dip in performance when the overlaps were less than 2\,seconds long \cite{shokouhi_teager_2017}.
 In one of the recent proposals using a Deep Learning based method,
@@ -150,21 +180,6 @@ Speakers exhibit very different intonations, pace, disfluencies, etc. when they 
 We believe that the characteristics of double-talks,
 with respect to typical duration, vocalization and content,
 would be difficult to replicate in artificially overlaps created from planned single speaker speech.
-
-% ------------------------------------------------------------------------------- TBL:ACTSPK-PERC -
-\begin{table}[t] \label{tbl:actspk-perc}
-  \caption{Percentage of segments and frames with different number of simultaneously active speakers in the $\sim \!\!\! \text{961\,hours}$ of Fisher English Corpus (Part 1).}
-  \centering
-  \begin{tabular}{crr}
-    \toprule
-    \textbf{Active Speakers}  & \textbf{Segments (\%)}  & \textbf{Frames (\%)}  \\ \midrule
-    0                         & 20.39                   &  6.86                 \\
-    1                         & 50.93                   & 79.61                 \\
-    2                         & 28.68                   & 13.53                 \\
-    \bottomrule
-  \end{tabular}
-  \vspace*{-\baselineskip}
-\end{table}
 
 Therefore, for our study, we have developed and evaluated our proposed system on naturally occurring double-talks in real telephonic conversations of the Fisher Corpus.  % TODO: T [ref] fisher paper, link
 We have limited ourselves to work with mono-aural audio recorded at a sample rate of 8000\,Hertz,
@@ -268,6 +283,7 @@ We discuss these approaches in the following sub-sections within the context of 
 %             - natural vs. artificial overlaps
 %             - sources are already separated, helping future more precise annotations
 %             - large dataset, affording certain decisions that would be otherwise restricted
+%             - Can be standard for this task after improvements; Andrei et al. cite lack of if
 % TODO: [text] mention ovl percentages in training and test
 Previous works have on detecting overlapping speech in conversations have used data from meetings in datasets like AMI, NIST RT, ICSI, and others.  % TODO: T [ref] to meeting datasets
 While they are appropriate, and perhaps the flagship scenario for evaluation,
