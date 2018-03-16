@@ -2,7 +2,7 @@
 \usepackage{INTERSPEECH2018}
 
 \title{
-       Detecting Overlapping Speech Segments in Conversations\\
+       Detecting Overlapping Speech Segments in Real Conversations\\
        using Deep Learning
 }
 
@@ -43,12 +43,13 @@
        - little if any background and motivation. address the experts.
        - factual but comprehensive.
 }
-We demonstrate training a Deep Convolutional Neural Network (DCNN) on real conversations to detect and segment naturally occurring instances of overlapping speech.
-Using DCNNs affords us to use low-level log-scaled mel-spectrograms and to avoid previously necessary manual feature engineering.
-We propose using conversational data from the Fisher English Corpus to properly train the DCNN while maintaining applicability to real conversational scenarios, as opposed to using artificially generated data.
+Segmenting natural occurrences of overlapping speech in real conversations has proven to be an extremely difficult challenge, demanding heavy feature engineering, or controlled studies using artificial data.
+We demonstrate training a Deep Convolutional Neural Network (DCNN) for this task, affording us to use relatively low-level log-scaled Mel-spectrograms from mono-aural recordings, one of the most difficult scenarios for this task.
+We propose using the real conversational data from the Fisher English Corpus to properly train the DCNN while maintaining and testing its applicability to real conversational scenarios.
 To alleviate the then imposed challenge of severe class-imbalance, we report the improvements achieved by removing silence from the training objective and uniformly randomly under-sampling the majority class during training.
-Simultaneously, we perform temporal smoothing using the Viterbi algorithm to enhance the final segmentations by utilizing the longer-term temporal patterns inherent to this phenomenon.
-Our results promise the applicability of DCNNs for this task and urge for more research towards working with imbalanced classes, common in real-world problems, while using deep learning, especially in the domain of speech technologies.
+Simultaneously, we perform temporal smoothing using the Viterbi algorithm to enhance the final segmentation.
+With more than 60\%~precision and more than 29\%~recall over more than 91~hours of conversations, our results demonstrate the applicability of DCNNs for this task with straightforward avenues for future works.
+
 \end{abstract}
 
 % ----------------------------------------------------------------------------------- INDEX TERMS -
@@ -264,6 +265,7 @@ We discuss these approaches in the following sub-sections within the context of 
 %TODO: T [text] mention more clearly why dataset choice helps in tackling class imbalance
 %             - natural vs. artificial overlaps
 %             - large dataset, affording certain decisions that would be otherwise restricted
+% TODO: [text] mention ovl percentages in training and test
 Previous works have on detecting overlapping speech in conversations have used data from meetings in datasets like AMI, NIST RT, ICSI, and others.  % TODO: T [ref] to meeting datasets
 While they are appropriate, and perhaps the flagship scenario for evaluation,
 these datasets pose extra challenging due to inconsistent and difficult recording conditions.
@@ -431,6 +433,7 @@ leading to a substantial improvement in $P^{(ov)}$ at a still smaller relative c
 
 % ----------------------------------------------------------------------------------- CONCLUSIONS -
 \section{Conclusions}
+% TODO: [text] urge for more research towards working with imbalanced classes, common in real-world problems, while using deep learning, especially in the domain of speech technologies.
 We have demonstrated the possibility of using a DCNN for detecting natural double-talk by appropriately training on real conversations.
 The challenge of class imbalance disadvantaging double-talks comes inherently with the use of real conversations for training.
 Even without handling for this challenge, our DCNN learned some relevant features for double-talks,
