@@ -88,7 +88,7 @@ or competitively interrupt having misjudged their turn to speak.
 Its occurrence is of interest for Conversation Analysis in studying the
 turn-taking management done by the participants of a conversation.
 While the frequency and durations of overlaps can vary depending on the situation,
-overlaps are quite frequent and characteristically brief (predominently smaller than 1~sec)
+overlaps are quite frequent and characteristically brief (predominently smaller than 1~second)
 during normal spontaneous conversations (Figure~\ref{fig:dt-dist}),
 making their manual annotation expensive and automatic detection challenging.
 
@@ -160,26 +160,33 @@ is rooted in the inherent imbalance between the three classes.
 It can be seen in Table \ref{tbl:actspk-perc} that in spontaneous conversations,
 while the individual segments with overlaps constitute a significant proportion of the total,
 due to their predominently small duration,
-they account for the smallest proportion of individual frames.
+they account for the smallest proportion of individual (10~milliseconds) frames.
 Some studies have attempted to solve this issue by training on artificially overlapped speech.
 Shokouhi et al. reported better results when using their proposed Pyknograms as acoustic features for detecting overlaps under different noise conditions,
 but their evaluations showed a discouraging dip in performance when the overlaps were less than 2\,seconds long \cite{shokouhi_teager_2017}.
-In one of the recent proposals using a Deep Learning based method,
-Andrei et al. reported achieving one of the better results in detecting overlaps of 500, 100 and 25\,millisecond \textit{window durations} \cite{AndreiDetectingOverlappedSpeech2017}
-(it is unclear from the paper if this is also the temporal resolution (\textit{hop-size}) at which the predictions were made)
-when MFCCs were combined with other acoustic features as inputs to a convolutional neural network.
-However, no evaluations of such systems have been reported on detecting naturally occurring double-talks in real conversations.
-Nevertheless, we believe that this approach of artificially increasing the training data has some pitfalls.
-Most such approaches use with recordings of planned speech recorded in clean conditions as the raw data.
-While artificially also adding noise helps in making the system more robust for real-world scenarios,
-as done by Shokouhi et al. in their study \cite{shokouhi_teager_2017},
-planned speech itself has very different properties than the spontaneous scenarios the system has to be applied to.
-For example, certain vocal events like laughter, or certain utterances like those used as backchannels (e.g. “hmm", “m-hm"), which often and almost exclusively occur in natural conversations as overlapping utterances,
+Similarly limitated temporal resolutions were reported by Andrei et al. for their previous works on a related task,
+but in one of their recent proposals using a Deep Learning based method,
+Andrei et al. reported achieving one of the better results in detecting overlaps of
+500, 100 and 25\,milliseconds \textit{window durations} \cite{AndreiDetectingOverlappedSpeech2017}
+(it is unclear from the paper if this is also the temporal resolution, i.e. the \textit{hop-size}, at which the predictions were made, neither is the distribution of the lengths of overlaps).
+They combined MFCC with three other acoustic features to train a convolutional neural network.
+However, no evaluations of such systems have been reported on detecting natural double-talks in real conversations.
+
+Nevertheless, we believe that this approach of artificially increasing the training data for this task has some significant pitfalls.
+Most such approaches use recordings of planned speech recorded in clean conditions as the raw data.
+While artificially adding noise may help with robustness for real-world scenarios
+(as done by Shokouhi et al. in their study \cite{shokouhi_teager_2017}),
+planned speech itself has very different properties than
+the spontaneous scenarios the system has to be ultimately applied to.
+For example, certain vocal events like laughter,
+or certain utterances like those used as backchannels (e.g. “hmm", “m-hm"),
+which often and almost exclusively occur in natural conversations as overlapping utterances,
 are difficult to account for in planned speech faithfully.
-Speakers exhibit very different intonations, pace, disfluencies, etc. when they are speaking alone than when they are in a conversation.
+Speakers exhibit very different intonations, pace, disfluencies, etc. when
+they are speaking alone than when they are in a spontaneous conversation.
 We believe that the characteristics of double-talks,
 with respect to typical duration, vocalization and content,
-would be difficult to replicate in artificially overlaps created from planned single speaker speech.
+would be difficult to replicate in artificial overlaps created from planned single speaker speech.
 
 Therefore, for our study, we have developed and evaluated our proposed system on naturally occurring double-talks in real telephonic conversations of the Fisher Corpus.  % TODO: T [ref] fisher paper, link
 We have limited ourselves to work with mono-aural audio recorded at a sample rate of 8000\,Hertz,
