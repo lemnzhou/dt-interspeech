@@ -159,19 +159,21 @@ is rooted in the inherent imbalance between the three classes.
 It can be seen in Table \ref{tbl:actspk-perc} that in spontaneous conversations,
 while the individual segments with overlaps constitute a significant proportion of the total,
 due to their predominently small duration,
-they account for the smallest proportion of individual (10~milliseconds) frames.
+they account for the smallest proportion of individual (10~ms) frames.
 Some studies have attempted to solve this issue by training on artificially overlapped speech.
 Shokouhi et al. reported better results when using their proposed Pyknograms as acoustic features for detecting overlaps under different noise conditions,
-but their evaluations showed a discouraging dip in performance when the overlaps were less than 2\,seconds long \cite{shokouhi_teager_2017}.
+but their evaluations showed a discouraging dip in performance when the overlaps were less than 2~seconds long \cite{shokouhi_teager_2017}.
 Similarly limitated temporal resolutions were reported by Andrei et al. for their previous works on a related task,
 but in one of their recent proposals using a Deep Learning based method,
 Andrei et al. reported achieving one of the better results in detecting overlaps of
-500, 100 and 25\,milliseconds \textit{window durations} \cite{AndreiDetectingOverlappedSpeech2017}
+500, 100 and 25\,ms \textit{window durations} \cite{AndreiDetectingOverlappedSpeech2017}
 (it is unclear from the paper if this is also the temporal resolution, i.e. the \textit{hop-size}, at which the predictions were made, neither is the distribution of the lengths of overlaps).
 They combined MFCC with three other acoustic features to train a convolutional neural network.
-However, no evaluations of such systems have been reported on detecting natural double-talks in real conversations.
+However, no evaluations of such systems have been reported on detecting natural double-talks in real conversations,
+while our own exploratory ones were not encouraging.
 
-Nevertheless, we believe that this approach of artificially increasing the training data for this task has some significant pitfalls.
+We believe that this approach of artificially increasing the training data for
+this task has some significant pitfalls.
 Most such approaches use recordings of planned speech recorded in clean conditions as the raw data.
 While artificially adding noise may help with robustness for real-world scenarios
 (as done by Shokouhi et al. in their study \cite{shokouhi_teager_2017}),
@@ -187,18 +189,21 @@ We believe that the characteristics of double-talks,
 with respect to typical duration, vocalization and content,
 would be difficult to replicate in artificial overlaps created from planned single speaker speech.
 
-Therefore, for our study, we have developed and evaluated our proposed system on naturally occurring double-talks in real telephonic conversations of the Fisher Corpus.  % TODO: T [ref] fisher paper, link
-We have limited ourselves to work with mono-aural audio recorded at a sample rate of 8000\,Hertz,
-in part forced by our choice of the dataset,
-and in part motivated by our desire for the system to be applicable to almost all recording conditions.
-Our system uses a Deep Convolutional Neural Network (DCNN) based automatic feature extractor and classifier working only on log-mel-spectrograms as inputs,
-and hence avoids the need of previously prevelant feature engineering necessary for the task.
-We present our proposals and systematic evaluation of different training strategies for solving the class imbalance issue and other inherent challenges posed by the problem.
-Furthermore, we also evaluate the imporvements to our DCNN achieved by temporally smoothing its potentially noisy predictions
-by using the Viterbi algorithm that incorporates longer-term temporal patterns that our DCNN is not able to learn on its own.
+Therefore, we have developed and evaluated our proposed system on real conversations with natural double-talks.
+It uses a DCNN based automatic feature extractor and classifier working only on
+log-scaled Mel-spectrograms as inputs,
+and hence avoids the need for manual feature engineering
+(Section \ref{sec:approach}).
+We limited ourselves to work with mono-aural audio with a sample rate of 8~kHz,
+partly forced by our choice of the dataset,
+but mainly motivated by our desire for the system to be applicable to almost any recording setup
+(Section \ref{sec:dataset}).
+Here we describe effective training strategies for counteracting the class imbalance issue
+(Section \ref{sec:imbalance}) and evaluate their impact (Section \ref{sec:eval}).
+% alongside the benefits of temporal smoothing using Viterbi algorithm .
 
 % -------------------------------------------------------------------------------------- APPROACH -
-\section{Approach}
+\section{Approach} \label{sec:approach}
 Our system performs frame-wise classification of the extracted acoustic features for a mono-aural audio into three classes based on the number of simultaneously speaking speakers:
 zero (silence) $(no)$, one $(sp)$, or more than one (overlap) $(ov)$.
 For our approach, we used 64\,dimensional $\text{log}_{10} \text{-scaled}$ melspectrograms (filter-banks)
@@ -213,27 +218,8 @@ while also avoiding impact of unrelated outliers if it were done over the entire
 Additional variance normalization was not found to be helpful,
 which is in line with other proposals using deep architectures.  % TODO: T [ref] against variance normalization in DL
 
-The particular architecture of our DCNN is a heavily simplified version of VGG-net (Table X),  % TODO: T [ref] VGG-net
-All trainings were performed using Adamax to optimize the categorical cross-entropy of the probability mass output for the three classes.
-When constructing the input to our DCNN,
-after the feature vectors have been normalized and before shuffled batches are created,
-we add 10 frames each from immediately before and after a given frame to be classified (see inputs in Table X)  % TODO: T [tbl] DCNN arch
-with the goal to provide additional contextual information to the classifier.
-Our preliminary experiments showed that using fewer number of contextual frames gave relatively worse results,
-while larger values came at significant computational cost.
-We fixed our feature extraction pipeline and the DCNN's architecture for all our experiments in order to isolate the variables for the different training strategies discussed in later sections.
-
-The frame-wise class posteriors class posteriors produced by our DCNN cannot exploit longer-term temporal patterns inherent to this problem with respect to typical duration of segments,
-their probability of occurrence, etc.
-The `raw' predictions obtained by simply applying frame-wise $argmax$ on the posteriors were observed to be noisy.
-We therefore also experimented with applying the Viterbi algorithm \cite{rabiner_tutorial_1989} for decoding a temporally `smoothed' final segmentation and report its impact here.
-The prior- and transition-probabilties used by the algorithm were calculated calculated on the training dataset and,
-being class posteriors, the emission-probabilties were set to $1$.
-Unlike most previous works,  % TODO: T [ref] papers that use OIP || non-ergodic HMM
-we did not use an overlap-insertion penalty or manually modify the calculated probabilities.
-
 % --------------------------------------------------------------------------------- TBL:DCNN-ARCH -
-\begin{table}[t] \label{tbl:dcnn-arch}
+\begin{table}[t]
   \caption{Architecture of the DCNN, and layers in each block.}
   \centering
   \begin{tabular}{ll}
@@ -271,11 +257,31 @@ we did not use an overlap-insertion penalty or manually modify the calculated pr
       \bottomrule
     \end{tabular}
   \end{footnotesize}
+  \label{tbl:dcnn-arch}
   \vspace*{-\baselineskip}
 \end{table}
 
+The particular architecture of our DCNN is a heavily simplified version of VGG-net (Table X),  % TODO: T [ref] VGG-net
+All trainings were performed using Adamax to optimize the categorical cross-entropy of the probability mass output for the three classes.
+When constructing the input to our DCNN,
+after the feature vectors have been normalized and before shuffled batches are created,
+we add 10 frames each from immediately before and after a given frame to be classified (see inputs in Table X)  % TODO: T [tbl] DCNN arch
+with the goal to provide additional contextual information to the classifier.
+Our preliminary experiments showed that using fewer number of contextual frames gave relatively worse results,
+while larger values came at significant computational cost.
+We fixed our feature extraction pipeline and the DCNN's architecture for all our experiments in order to isolate the variables for the different training strategies discussed in later sections.
+
+The frame-wise class posteriors class posteriors produced by our DCNN cannot exploit longer-term temporal patterns inherent to this problem with respect to typical duration of segments,
+their probability of occurrence, etc.
+The `raw' predictions obtained by simply applying frame-wise $argmax$ on the posteriors were observed to be noisy.
+We therefore also experimented with applying the Viterbi algorithm \cite{rabiner_tutorial_1989} for decoding a temporally `smoothed' final segmentation and report its impact here.
+The prior- and transition-probabilties used by the algorithm were calculated calculated on the training dataset and,
+being class posteriors, the emission-probabilties were set to $1$.
+Unlike most previous works,  % TODO: T [ref] papers that use OIP || non-ergodic HMM
+we did not use an overlap-insertion penalty or manually modify the calculated probabilities.
+
 % ---------------------------------------------------------------------- TACKLING CLASS IMBALANCE -
-\section{Tackling Class Imbalance}
+\section{Tackling Class Imbalance} \label{sec:imbalance}
 While deep learning methods are extremely powerful,
 they also suffer from degradation in performance as classic approaches do when the target classes are severely imbalanced.
 There have been relatively few systematic studies to solve this problem in the context of deep learning.
@@ -284,7 +290,7 @@ Their proposals are often not so straightforward to apply on speech signals.
 We discuss these approaches in the following sub-sections within the context of detecting overlapping speech.
 
 % --------------------------------------------------------------------------------------- DATASET -
-\subsection{Dataset}
+\subsection{Dataset} \label{sec:dataset}
 %TODO: T [text] mention more clearly why dataset choice helps in tackling class imbalance
 %             - natural vs. artificial overlaps
 %             - sources are already separated, helping future more precise annotations
@@ -380,7 +386,8 @@ this method is equivalent in impact to naive rebalancing of the training data,  
 and hence we did not investigate this method in our study.
 
 % ----------------------------------------------------------------------------------- EXPERIMENTS -
-\section{Experiments}
+\section{Experiments} \label{sec:eval}
+
 % ---------------------------------------------------------------------------- FIG:RAW-SMTH-PREDS -
 \begin{figure*}[t] \label{fig:raw-smth-preds}
   \centering
