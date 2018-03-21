@@ -298,60 +298,50 @@ we did not use an overlap-insertion penalty or manually modify the calculated pr
 
 % --------------------------------------------------------------------------------------- DATASET -
 \section{Dataset} \label{sec:dataset}
-%TODO: T [text] mention more clearly why dataset choice helps in tackling class imbalance
-%             - natural vs. artificial overlaps
-%             - sources are already separated, helping future more precise annotations
-%             - large dataset, affording certain decisions that would be otherwise restricted
-%             - Can be standard for this task after improvements; Andrei et al. cite lack of if
-% TODO: [text] mention ovl percentages in training and test
-Previous works on detecting overlapping speech in conversations have used data from meetings in datasets like AMI, NIST RT, ICSI, and others.  % TODO: T [ref] to meeting datasets
-While they are appropriate, and perhaps the flagship scenario for evaluation,
-these datasets extra extra challenges due to inconsistent and difficult recording conditions.
-Previous works have utilized only a subset of these datasets,
-often to be comparable to other works,  % TODO: T [ref] papers that use meeting dataset for consistency
-or due to limitations imposed by these conditions.
-This subset was not enough to appropriately train a DCNN with the different strategies to tackle class-imbalance.
-We decided to instead perform our study using the Fisher English Corpus (Part 1),  % TODO: T [ref] Fisher paper
-which
-% consists of 5,850 telephone based conversations (amounting to more than 960\,hours) and
-is predominently used in conversational and large vocabulary speech recognition research.  %TODO: T [ref] papers using Fisher
+Previous works on detecting overlapping speech in conversations have used AMI, NIST RT, ICSI,
+and other meeting datasets (all mentioned in \cite{cetin_speaker_2006}).
+While they are appropriate, and perhaps the flagship scenario for this problem,
+these datasets pose extra challenges due to inconsistent and difficult recording conditions.
+Furthermore, previous works have utilized only a subset of these datasets,
+often to stay comparable to other works or due to other limitations.
+This subset was not enough to appropriately train a DCNN while tackling class-imbalance.
+We instead performed our study using the Fisher English Corpus (Part 1) \cite{cieri_switchboard_2003},
+which is predominently used in LVCSR research.
 Most of its telephone based conversations have naturally occurring double-talks,
-and the shear size ($\sim \!\!\! \text{961~hours}$) of the available data makes certain simpler decisions later more affordable.
-However, we only roughly used roughly 200~hours of the dataset during trainings
-(groups~001~to~012, with 1299~calls) and a fixed set of roughly 91~hours for testing
+and the shear size ($\sim \! \text{961~hours}$) of the available data makes certain simpler decisions later more affordable.
+However, we only used $\sim \! \text{200~hours}$
+($\sim \! \text{10\%}\,(ov)$) of the dataset during trainings
+(groups~001~to~012, with 1299~calls) and a fixed set of
+$\sim \! \text{91~hours}$ ($\sim \! \text{14\%}\,(ov)$) for testing
 (groups~053~to~058, with 551~calls),
-mainly restricted by the training times for a DCNN.
+mainly restricted by the computational cost.
 
 Nevertheless, the Corpus imposes certain limitations of its own.
-Being a telephone based conversation, the maximum number of overlapping speakers is strictly limited to two.
-However, this scenario covers the majority of double-talk situations even when there are more than two participants.  % TODO: T [ref] Zelenak
-All audios are sampled at 8,000\,Hertz, which could be a disadvantage,
+Being a telephone based conversation,
+the maximum number of overlapping speakers is strictly limited to two.
+However, this scenario covers the majority of double-talk situations even when there are more than two participants.
+All audios are sampled at 8~kHz, which could be a disadvantage,
 but it is easier to reliably downsample audios of higher quality than doing the opposite.
-In fact, by using mel-scaling with a fixed number of 64\,filter-banks,
-our system can injest audio of any sample-rate,
-although it may not be able to benefit from the better characteristics of higher quality audios.
-Along the same lines, the raw recordings in the Fisher Corpus have two speaker specific channels which, when merged,
+In fact, by using mel-scaling with a fixed number of filter-banks,
+our system can ingest audio of any sample-rate.
+Along same lines,
+the raw audios have two speaker specific channels which, when merged,
 can only be used as mono-aural audios.
 While using multi-channel audio could be better for performance,
-but by supporting this least common denominator condition,
-our system is applicable to most scenarios.
+by supporting this least common denominator condition,
+our system is applicable to almost all scenarios.
 
-A more important problem with the dataset is the relative imprecision in annotation of the utterance boundaries.
+A more pertinent problem with the Corpus is the relative imprecision in the utterance boundaries.
 As per the documentation,
-these boundaries were not manually modified after they were determined by a speech activity detection system,   % TODO: T [ref] Fisher corpus
+these boundaries were determined by a speech activity detection system and not manually verified,
 but the properties of this system have not been mentioned,
 and we found it to be less precise than ideal, especially in regions of small gaps.
 These inaccuracies do not impact ASR systems as much as they would a system that needs to temporally localize events in the audio.
-A powerful enough DCNN, when a large enough dataset is available to learn from,
-may however be robust to such lack of precision,
+A powerful enough DCNN trained on a large dataset can be robust against such lack of precision,
 and we did indeed observe this in many of our experiments.
-Such inaccuracies exist in other datasets as well,
-but they do not offer as much data for a deep learning method to comfortably learn from,
-motivating us further to use the Fisher Corpus.
-Nonetheless, these inaccuracies perhaps explain the peaks and tails in the segment length distribution in Figure X,  % TODO: T [fig] ovl segment dist
-and can adversely impact the summary metrics used for evaluating the system, including the ones reported here.
-We did not, however, modify the annotations before using them for the experiments reported here.
-% but we strongly recommend using a better speech activity detector to improve the available utterance boundaries for future works in this direction.
+Nevertheless, these inaccuracies can adversely impact the evaluations of the system.
+We did not modify the annotations before using them for the experiments reported here,
+but improving them should be easier given independent speaker channels are available.
 
 % ---------------------------------------------------------------------- TACKLING CLASS IMBALANCE -
 \section{Tackling Class Imbalance} \label{sec:imbalance}
