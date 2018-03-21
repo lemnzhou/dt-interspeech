@@ -344,54 +344,47 @@ We did not modify the annotations before using them for the experiments reported
 but improving them should be easier given independent speaker channels are available.
 
 % ---------------------------------------------------------------------- TACKLING CLASS IMBALANCE -
-\section{Tackling Class Imbalance} \label{sec:imbalance}
-% While deep learning methods are extremely powerful,
-% they also suffer from degradation in performance as classic approaches do when the target classes are severely imbalanced.
-% There have been relatively few systematic studies to solve this problem in the context of deep learning.
-% Of ones that exist, most have concentrated on image classification related tasks.  % TODO: T [ref,search] DL with imbalance
-% Their proposals are often not so straightforward to apply on speech signals.
-% We discuss these approaches in the following sub-sections within the context of detecting overlapping speech.
-%
+\section{Tackling class-imbalance} \label{sec:imbalance}
+% \vspace*{-\baselineskip}
 % -------------------------------------------------------------------- RE-BALANCING TRAINING DATA -
-\subsection{Rebalancing Training Data}
-Rebalancing the dataset that is seen by the system during training is the most common approach used to tackle the impact of imbalanced classes,
-by either oversampling from the minority classes or undersampling from the majority classes.
-When the available dataset is limited, oversampling is the most prevelant method,
-and is often done by creating new examples of the minority class by transforming the existing examples in a way that is irrelevant to the task at hand (e.g. flipping an image) or other more sophisticated methods (e.g. SMOTE) to avoid overfitting.  % TODO: T [ref] paper on re-balancing, SMOTE
-Such transformations are not straightforward to perform on audio signals.
-Nevertheless, afforded by the size of the dataset available to us,
-we instead chose to only evaluate majority undersampling for one of our experiments.
-For this, we skipped frames with a single speaker's speech uniformly randomly when preparing the inputs for the DCNN,
-such that the final ratio between single speech frames to overlapping speech was two-to-one
-% (we removed silence frames entirely when undersampling as explained in Section X.x).  % TODO: T [ref] removing silence section.
-We chose the ratio to be two-to-one instead of one-to-one as an approximate method for presenting the DCNN with equal number of frames for each speaker alone and when overlapped.
-A more sophisticated method for undersampling involves preferring examples of the majority near the boundaries with the minority class,
-but we did not do this due to the imprecision in the boundary annotations (in most datasets).
+\subsection{Rebalancing training data}
+% \vspace*{-\baselineskip}
+Rebalancing the data that is seen by the system during training is the most common approach used to tackle the impact of imbalanced classes,
+by either oversampling from the minority classes or undersampling from the majority classes
+\cite{wang_training_2016,Budasystematicstudyclass2017}.
+When the dataset is small, oversampling is the most prevelant method,
+and is preferably done by creating new examples of the minority class by transforming existing ones using several methods to avoid overfitting (e.g. SMOTE).
+However, such transformations are not straightforward for audio signals.
+Nevertheless, afforded by the size of our dataset,
+we instead chose to only evaluate majority undersampling for one of our experiments reported here.
+For this, we skipped frames with a single speaker's speech uniformly randomly when creating the mini-batches,
+such that the final overall $(sp)$ to $(ov)$ ratio was two-to-one.
+We chose this ratio as an approximate method for presenting the DCNN with relatively equal number of frames for each speaker alone and as overlapped.
+Undersampling while preferring examples near the class boundaries may help learn more discriminating features,
+but we did not do this due to the imprecise boundary annotations in most speech datasets.
 
 % ------------------------------------------------------------------------------ REMOVING SILENCE -
-\subsection{Removing Silence} \label{sec:rm-silence}
+\subsection{Removing silence} \label{sec:rm-silence}
+% \vspace*{-\baselineskip}
 Silence, or lack of speech, is more easily discriminable than speech from any number of speakers,
 whereas discriminating between speech produced by a single speaker and that produced by multiple speakers simultaneously, even in isolation, can prove difficult.
-This problem becomes more severe due the imbalance disadvantaging overlapping speech more.
-This may result in situations where a neural network gets stuck in a steep local minima that is irrelevant, or even disadvantageous to double-talk detection.
-Furtheremore, silence detection can be done by using much simpler methods than an expensive DCNN.  % IDEA: T [search,ref] more recent and better performing silence detection
-Therefore, similar to many other previous works,  % TODO: T [ref] DT papers skipping silence
-for a set of the experiments reported here,
-we removed silence from the training objective based on the ground-truth label.
-During evaluations of these experiments,
-to enable temporal smoothing
-we explicitly set the silence frames of the DCNN to be perfect predictions based on the ground-truth label,
-instead of using an automated speech detector, to isolate the variables under study.
+This problem becomes more severe due the imbalance disadvantaging overlapping speech more,
+and may result in a neural network getting stuck in a steep local minima where its objective for detecting silence is met very well, but not at all for double-talk detection.
+Furtheremore, silence detection can be done by using much simpler methods than an expensive DCNN.
+Therefore, similar to most previous works,
+we experimented with removing all silence frames during training based on the true labels.
+To enable temporal smoothing during evaluations of these experiments,
+we explicitly set the silence frames to be perfect predictions based on the true labels for silence.
 
 % ----------------------------------------------------------------------------------------- OTHER -
 \subsection{Other}
-Moving the decision threshold based on class priors is another method to tackle class imbalance.
-Unfortunately, our experiments with this method were unstable and unreliable enough to be inconclusive, and hence are not reported here.
+% \vspace*{-\baselineskip}
+Moving the decision threshold based on class priors is another popular method,
+but our experiments with this method were unstable and unreliable enough to be inconclusive,
+and hence they are not reported here.
 Perhaps this was due to the imbalance being too steep over a relatively few number of classes.
-Another method is to modify the loss function during training based on misclassification penalties.
-However, for stochastic gradient descent,
-this method is equivalent in impact to naive rebalancing of the training data,  % TODO: T [search,ref] cost-sensitive objective is rebalancing
-and hence we did not investigate this method in our study.
+Another method is to modify the loss function to incorporate misclassification penalties.
+However, it is equivalent to naive oversampling for stochastic gradient descent based training \cite{Budasystematicstudyclass2017}.
 
 % ----------------------------------------------------------------------------------- EXPERIMENTS -
 \section{Experiments} \label{sec:eval}
@@ -466,6 +459,7 @@ leading to a substantial improvement in $P^{(ov)}$ at a still smaller relative c
 % ----------------------------------------------------------------------------------- CONCLUSIONS -
 \section{Conclusions}
 % TODO: [text] urge for more research towards working with imbalanced classes, common in real-world problems, while using deep learning, especially in the domain of speech technologies.
+%             Fisher Can be standard for this task after improvements; Andrei et al. cite lack of if
 We have demonstrated the possibility of using a DCNN for detecting natural double-talk by appropriately training on real conversations.
 The challenge of class imbalance disadvantaging double-talks comes inherently with the use of real conversations for training.
 Even without handling for this challenge, our DCNN learned some relevant features for double-talks,
