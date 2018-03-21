@@ -290,7 +290,7 @@ we did not use an overlap-insertion penalty or manually modify the calculated pr
 % ---------------------------------------------------------------------------- FIG:RAW-SMTH-PREDS -
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=1.0\linewidth]{figures/raw-smth-preds.png}
+  \includegraphics[width=\linewidth]{figures/raw-smth-preds.png}
   \caption{True labels, raw-, and smoothed-predictions for part of a conversation, after training on rebalanced data without silence.}
   \label{fig:raw-smth-preds}
   \vspace*{-\baselineskip}
@@ -458,40 +458,37 @@ leading to a substantial improvement in $P^{(ov)}$ at a still smaller relative c
 
 % ----------------------------------------------------------------------------------- CONCLUSIONS -
 \section{Conclusions}
-% TODO: [text] urge for more research towards working with imbalanced classes, common in real-world problems, while using deep learning, especially in the domain of speech technologies.
-%             Fisher Can be standard for this task after improvements; Andrei et al. cite lack of if
-We have demonstrated the possibility of using a DCNN for detecting natural double-talk by appropriately training on real conversations.
-The challenge of class imbalance disadvantaging double-talks comes inherently with the use of real conversations for training.
-Even without handling for this challenge, our DCNN learned some relevant features for double-talks,
-demonstrating the power of this deep learning method.
-We also showed that, in line with previous works,
-removing silence from the training objective is useful in reducing the disadvantage against double-talks,
-and that the most benefitial strategy was to rebalance the training dataset.
+We have demonstrated training a DCNN on real conversations to detect natural double-talks.
+Recognizing the difficulties posed by the traditionally used meeting datasets for this task,
+we proposed using the Fisher English Corpus instead of artificially overlapped data for training.
+While the added limitation to only mono-aural audios at low sampling rate makes it one of the most technically difficult scenario for this task,
+it also makes the resulting system the most versatile in applicability.
+Using real conversations however poses the challenge of class-imbalance that severely disadvantages double-talks.
+However, even without tackling it, our DCNN learned some features unique to double-talks.
+In fact, our DCNN automatically learned these features only from the relatively low-level log-scaled Mel-spectrograms,
+as opposed to manually engineered combinations used by previous works.
 
-The DCNN is capable of automatically learning the appropriate features for the task from the relatively low-level log-scaled melspectrograms.
-Our decision to use the Fisher Corpus not only provided us with a large dataset for training and evaluation,
-but also afforded us to choose under-sampling as the strategy for rebalancing the training data.
-We believe that a system trained using this dataset and strategy is more readily and performantly applicable to detecting real conversations than one trained on artificial data.
-A large enough dataset with higher quality audio and annotations would be better,
-but we expect it to be an expensive one to acquire, if not build.
+We showed that, in line with previous works,
+removing silence from the training objective is helpful in reducing the disadvantage against double-talks.
+% A good voiced-activity detector can be straightforwardly used in a preprocessing step during application phase for this task.
+We then showed that much more improvement can be achieved by rebalancing the classes during training.
+The size of the Corpus afforded us to choose undersampling as the strategy for this purpose.
+Future works with this Corpus for this task should consider employing a better speech detector to improve the precision of the annotations.
 
-We expect a more powerful DCNN architecture to perform better for this problem.
-However, we also demonstrated the weakness of DCNNs in exploiting longer-term temporal patterns
+There is obviously still a large room for improvement.
+We expect a more powerful DCNN architecture to perform better,
+but we also demonstrated the weakness of DCNNs in exploiting longer-term temporal patterns,
 and reported improvements by temporal-smoothing of the posteriors using the Viterbi algorithm.
-We therefore expect more improvements in performance by architectures that are capable of learning such patterns automatically (e.g. recurrent neural networks),
-and perhaps even better when combined with convolutional neural networks based feature extractors.
-
-The apparently steep trade-off between precision and recall that are the hall-mark of working with such heavily imbalanced classes was seen in the results very clearly.
+We therefore expect components that are capable of learning such patterns automatically to be more worthwhile modifications to investigate (e.g. LSTM cells).
 There is a lack of comprehensive studies for tackling class imbalance when using deep learning,
 especially in tasks related to speech technologies.
-The task of detecting natural double-talks, as yet remaining an unsolved problem,
-could be a worthwhile candidate for such studies,
-if not also benefitting speech technologies that suffer in situations of overlapping speech.
-
+We believe that this task could be a worthwhile candidate for such studies,
+if not only benefitting speech technologies that suffer in situations of overlapping speech.
 
 % ------------------------------------------------------------------------------ ACKNOWLEDGEMENTS -
 \section{Acknowledgements}
-This research has been funded by the Federal Ministry of Education and Research of Germany (BMBF) in the project \textit{KA$^3$~-~K{\"o}lner Zentrum für Analyse und Archivierung von AV-Daten} (Cologne center for the analysis and archiving of audiovisual data) (project number: 01UG1511B).
+This research was funded by the Federal Ministry of Education and Research of Germany (BMBF) in the project \textit{KA$^3$~-~K{\"o}lner Zentrum für Analyse und Archivierung von AV-Daten} (Cologne center for the analysis and archiving of audiovisual data), number:~01UG1511B.
+Felix Rau (Universit{\"a}t zu K{\"o}ln) and Alexander Esser (Fraunhofer IAIS) also contributed invaluably.
 
 % ---------------------------------------------------------------------------------- BIBLIOGRAPHY -
 \bibliographystyle{IEEEtran}
