@@ -390,7 +390,7 @@ However, it is equivalent to naive oversampling for stochastic gradient descent 
 \section{Experiments} \label{sec:eval}
 
 % ---------------------------------------------------------------------------------- TBL:RESULTS -
-\begin{table}[t] \label{tbl:results}
+\begin{table}[t]
   \caption{Class-wise precision $P$ and recall $R$ after different strategies, using $argmax$ `raw' or smoothed `smth` decoding.}
   \centering
   % \begin{tabular}{rrrrrrr}
@@ -406,54 +406,54 @@ However, it is equivalent to naive oversampling for stochastic gradient descent 
     $R^{(ov)}$  & \textbf{ 7.89}   & \textbf{ 5.05}      & \textbf{12.22}   & \textbf{ 8.82}          & \textbf{36.93}   & \textbf{29.55}         \\
     \bottomrule
   \end{tabular}
+  \label{tbl:results}
   \vspace*{-\baselineskip}
 \end{table}
 
 In the presence of imbalance, classwise precision and recall are more informative than common measures like overall accuracy.
-We report these metrics of the raw and smoothed segmentations at the frame level for all classes together so that any degradations in performance for other classes due to strategies to improve the results on a particular target can be detected more clearly.
-All evaluations were performed on the independent set roughly 91\,hours of conversations as specified earlier.
+We report these metrics of the raw and smoothed segmentations at the frame level for all classes.
+All evaluations were performed on the roughly 91~hours of conversations specified earlier.
 
 In our preliminary experiments with several deep learning architectures and parameters,
-we observed certain recognizable degenerate cases where the system failed to detect double-talks satisfactorily.
-Some of the least powerful architectures predicted all fames to contain speech from a single speaker $(sp)$,
-often with posterior probability as $1$, where not even temporal-smoothing could recover a useable result.
-% This is the classic case where a metric like overall accuracy would have mislead one severely.
-A common degenerate case with moderately powerful architectures was where the system would perform robustly in detecting silence frames $(no)$ but will never detect any double-talk frames $(ov)$.
+we observed certain degenerate cases where the system failed to satisfactorily detect $(ov)$.
+Some of the least powerful architectures predicted all fames to only be $(sp)$,
+often with posterior probability as $1$, where not even temporal-smoothing could have helped.
+% This is the classic case where a metric like overall accuracy would have been misleading.
+A common degenerate case with moderately powerful architectures was where the system would perform robustly in detecting $(no)$ but will never detect any $(ov)$.
 This unexpected voiced-activity detector demonstrated the extra disadvantage $(ov)$ face when $(no)$ is kept during training.
 When some measures like threshold-moving were applied,
-a common degenerate case involved extremely low precision for $(ov)$ from what seemed as random decisions for a frame to be from a single speaker $(sp)$ or multiple speakers $(ov)$.
+a common degenerate case involved extremely low precision for $(ov)$ ($P^{(ov)}$) from what seemed like random decisions for a frame to be $(sp)$ or $(ov)$.
 % Interestingly, in cases where silence was kept as part of the training objective,
 % this catastrophic level confusion still almost exclusively occurred between $(sp)$ and $(ov)$,
-% indicated by both a low precision for $(ov)$ ($P^{(ov)}$) and lower than 70\% recall for $(sp)$ ($R^{(sp)}$).
+% indicated by both a low $P^{(ov)}$ and lower than 70\% recall for $(sp)$ ($R^{(sp)}$).
 
 For a baseline performance measure of our DCNN,
-we trained the system for 20 passes over the training set without rebalancing the classes and also kept silence as part of the training objective.
-As tabulated in Table X,  % TODO: T [tbl,ref] table of all results
-this baseline system did not detect silence frames with good precision $P^{(no)}$ resulting in many false-positives,
-possibly due to the inadequacy of our crude denoising procedure.
-This proved taxing for detecting double-talks, resulting in unsatisfactory recall $R^{(ov)}$,
-perhaps due to the increased competition from silence of varying noise conditions.
-However, the good precision of detecting overlaps $P^{(ov)}$ indicates that the DCNN did find some of the appropriate features representing double-talk situations.
-Temporal smoothing improved $P^{(no)}$ and $P^{ov}$ by either removing impossibly short segments from the raw predictions or by filling in certain gaps (Figure X),  % IDEA: T [fig] true, raw, smoothed preds for baseline
-but this also removed some otherwise correctly predicted frames, mostly disadvantaging $R^{(ov)}$ further.
+we trained the system for 20~passes over the training set without rebalancing the classes and also kept silence as part of the training objective.
+As tabulated in Table~\ref{tbl:results},
+this baseline system did not detect $(no)$ with good precision ($P^{(no)}$).
+This proved taxing for detecting $(ov)$, resulting in unsatisfactory recall ($R^{(ov)}$),
+perhaps due to the increased competition from silence in varying noise conditions.
+However, the good $P^{(ov)}$ indicates that the DCNN did indeed find some of the discriminative features for $(ov)$.
+Temporal-smoothing improved $P^{(no)}$ and $P^{(ov)}$ by either removing impossibly short segments from the raw predictions or by filling in certain gaps,
+but this also removed some correctly predicted frames, mostly reducing $R^{(ov)}$.
 
 We then trained the same DCNN for 20 passes over the same imbalanced training set,
-but did not show it any silence frames, effectively removing it from the training objective and turning it into a binary classifier.
+but with the silence frames removed.
 During evaluation, the silence frames were not removed from the input but,
-interestingly enough, over the 91\,hours of our testing set,
-none of the silence frames were detected as overlaps,
-strongly suggesting that the DCNN had learned learned features that were specific to double-talks alone.
-This resulted in improvements in $R^{(ov)}$, but came at a significant cost to $P^{(ov)}$ for the raw decisions.
-The silence frames were manually set to perfect predictions to allow for temporal smoothing with the Viterbi algorithm,
-and this smoothing regained the lost $P^{(ov)}$ with a relatively smaller cost to $R^{(ov)}$ than in the previous experiment.
+interestingly enough, over the entire testing set,
+none of these silence frames were ever detected as $(ov)$,
+strongly suggesting that the DCNN had learned features that were unique to $(ov)$.
+For raw segmentation, we observed improvements in $R^{(ov)}$ but at a significant cost to $P^{(ov)}$.
+Temporal-smoothing however regained the lost $P^{(ov)}$ with a relatively smaller cost to $R^{(ov)}$ than in the previous experiment,
+all the while not cannibalizing on performance for $(sp)$.
 
 For the final experiment presented here,
-we trained our DCNN for 40 passes with a uniformly randomly under-sampled single-speaker class as explained previously, while also removing silence from the training objective.
-% We doubled the number of passes for this experiment to avoid any under-fitting of the single-speaker class.
+we trained our DCNN for 40 passes with uniformly randomly undersampled $(sp)$ as explained earler, while also removing silence.
+We doubled the number of passes for this experiment to avoid any underfitting of the single-speaker class.
 The evaluation on the testing set (which was obviously not rebalanced) showed an encouraging improvement in $R^{(ov)}$,
 but with discouragingly high number of false positives in the raw predictions.
-However, seeing that most of these false positives occurred as noisy, impossibly short segments,
-these were very adequately removed by the temporal smoothing procedure,
+However, most of these false positives occurred as noisy, impossibly short segments,
+and were very adequately removed by the temporal smoothing procedure (Figure~\ref{fig:raw-smth-preds}),
 leading to a substantial improvement in $P^{(ov)}$ at a still smaller relative cost to $R^{(ov)}$.
 
 % ----------------------------------------------------------------------------------- CONCLUSIONS -
