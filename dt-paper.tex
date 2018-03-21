@@ -209,17 +209,16 @@ Our system performs frame-wise classification of the extracted acoustic features
 zero~(silence)~$(no)$, one~$(sp)$, or more than one~(overlap)~$(ov)$.
 We used 64~dimensional $\text{log}_{10} \text{-scaled}$ Mel-spectrograms (filter-banks)
 extracted every 10~ms over a window of 32~ms (equivalent to 256~FFT-bins for 8~kHz audio),
-which have been shown to achieve better performance than MFCCs and pure spectrograms
-in various deep learning based acoustic models \cite{deng_recent_2013}.
+which have been shown to be better than MFCCs and pure spectrograms
+for various deep learning based acoustic models \cite{deng_recent_2013}.
 For the purpose of reducing the mismatch between training and testing conditions,
 and, given the features are log-scaled, as a measure against convolutive channel distortions \cite{li_overview_2014},
-we applied Cepstral Mean Normalization on the extracted features.
+we applied Cepstral Mean Normalization (CMN) on the extracted features.
 However, we performed this on a chunk-by-chunk basis,
-where the mean vector of a contiguous chunk of audio of roughly 2.5~minutes duration was used to center all the vectors of that chunk.
-This avoids the reliability issues with utterance level normalization \cite{prasad_improved_2013}
-by using long enough chunks,
-while also avoiding impact of unrelated outliers if it were done over the entire datatset.
-Additional variance normalization was not found to be better.
+where the mean vector of a roughly 2.5~minutes long contiguous chunk of audio of was used to center all the vectors of that chunk.
+This avoids the reliability issues with utterance level CMN \cite{prasad_improved_2013}
+since the chunks are longer,
+while also avoiding any impact of unrelated outliers if it were done over the entire datatset.
 
 % --------------------------------------------------------------------------------- TBL:DCNN-ARCH -
 \begin{table}[t]
@@ -264,30 +263,38 @@ Additional variance normalization was not found to be better.
   \vspace*{-\baselineskip}
 \end{table}
 
-The architecture of our DCNN is a heavily simplified version of VGG-net \cite{simonyan_very_2014}
-with roughly 572k parameters (Table~\ref{tbl:dcnn-arch}).
-All trainings were performed after a Glorot uniform initialization and using Adamax to optimize the categorical cross-entropy of the output posterior probabilites for the three classes.
+The architecture of our DCNN is a heavily simplified version of VGG-net \cite{simonyan_very_2014},
+with roughly 572k trainable parameters (Table~\ref{tbl:dcnn-arch}).
+All trainings were performed after a Glorot uniform initialization and by using Adamax to optimize the categorical cross-entropy of the output posterior probabilites for the three classes.
 When constructing an input to our DCNN,
-after the feature vectors have been normalized and before shuffled mini-batches are created,
+after the feature vectors have been normalized but before shuffled mini-batches are created,
 we add 10 frames each from immediately before and after a given frame that is to be classified
 to provide additional contextual information to the classifier.
 Using fewer of such contextual frames lead to worse results,
 while using more came at significant computational cost.
 We fixed our feature extraction pipeline and the DCNN's architecture for all our experiments,
-implemented using our highly modular open-source framework for
-speech segmentation using deep learning
-RENNET\footnote{https://github.com/fraunhofer-iais/rennet},
+implemented using our highly modular framework for
+speech segmentation using deep learning open-sourced as
+{RENNET}\footnote{https://github.com/fraunhofer-iais/rennet},
 which is built on top of NumPy, LibROSA, Keras, Tensorflow, and other reputable Python libraries.
 
-Our DCNN on its own does not exploit the longer-term temporal patterns inherent to this problem
-(e.g. typical duration of segments, probability of occurrence, etc.).
-The `raw' segmentation by simply applying frame-wise $argmax$ on the posteriors can be noisy.
-We therefore also use the Viterbi algorithm \cite{rabiner_tutorial_1989} for decoding a temporally `smoothed' final segmentation and report its impact here.
-The prior- and transition-probabilties used by the algorithm were calculated on the training set and,
+% As it is, the DCNN does not exploit the longer-term temporal patterns inherent to this problem
+% (e.g. typical duration of segments, probability of occurrence, etc.).
+The `raw' segmentation by simple frame-wise $argmax$ of the posteriors from the DCNN are usually noisy.
+We used the Viterbi algorithm \cite{rabiner_tutorial_1989} for decoding a temporally `smoothed' final segmentation and evaluate its impact here (Figure~\ref{fig:raw-smth-preds}).
+The prior- and transition-probabilties were calculated on the training set and,
 being class posteriors, the emission-probabilties were set to $1$.
-Unlike many previous works however
-\cite{zelenak_simultaneous_2012,zelenak_speaker_2012,GeigerUsinglinguisticinformation2013,geiger_detecting_2013,yella_overlapping_2014},
+Unlike many previous works \cite{zelenak_simultaneous_2012,zelenak_speaker_2012,GeigerUsinglinguisticinformation2013,yella_overlapping_2014,geiger_detecting_2013} however,
 we did not use an overlap-insertion penalty or manually modify the calculated probabilities.
+
+% ---------------------------------------------------------------------------- FIG:RAW-SMTH-PREDS -
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=1.0\linewidth]{figures/raw-smth-preds.png}
+  \caption{True labels, raw-, and smoothed-predictions for part of a conversation, after training on rebalanced data without silence.}
+  \label{fig:raw-smth-preds}
+  \vspace*{-\baselineskip}
+\end{figure*}
 
 % --------------------------------------------------------------------------------------- DATASET -
 \section{Dataset} \label{sec:dataset}
@@ -398,14 +405,6 @@ and hence we did not investigate this method in our study.
 
 % ----------------------------------------------------------------------------------- EXPERIMENTS -
 \section{Experiments} \label{sec:eval}
-
-% ---------------------------------------------------------------------------- FIG:RAW-SMTH-PREDS -
-% \begin{figure*}[t] \label{fig:raw-smth-preds}
-%   \centering
-%   \includegraphics[width=0.8\linewidth]{figures/raw-smth-preds.png}
-%   \caption{True labels, raw-, and smoothed-predictions for part of a conversation, after training on rebalanced inputs.}
-%   \vspace*{-\baselineskip}
-% \end{figure*}
 
 % ---------------------------------------------------------------------------------- TBL:RESULTS -
 \begin{table}[t] \label{tbl:results}
