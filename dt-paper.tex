@@ -82,7 +82,7 @@ Overlapping speech, interchangeably referred to as double-talk in this paper,
 occurs when more than one speakers speak simultaneously at a given instant.
 It is a common occurrence in spontaneous conversations when
 other participants often utter something while a speaker is already speaking,
-possibly to demonstrate non-competitive acknowledgement (e.g. ``mhm'') or reaction (e.g. laughing),
+possibly to demonstrate non-competitive acknowledgement (e.g. ``m-hm'') or reaction (e.g. laughing),
 or competitively interrupt having misjudged their turn to speak.
 Its occurrence is of interest for Conversation Analysis in studying the
 turn-taking management done by the participants of a conversation.
@@ -162,16 +162,17 @@ while the individual segments with overlaps constitute a significant proportion 
 due to their predominently small duration,
 they account for the smallest proportion of individual (10~ms) frames.
 Some studies have attempted to solve this issue by training on artificially overlapped speech.
-Shokouhi et al. reported better results when using their proposed Pyknograms as acoustic features for detecting overlaps under different noise conditions,
-but their evaluations showed a discouraging dip in performance when the overlaps were less than 2~seconds long \cite{shokouhi_teager_2017}.
+Shokouhi et al. reported better results for detecting artificial overlaps under different noise conditions
+when using their proposed Pyknograms as acoustic features,
+but their evaluations showed a discouraging dip in performance for overlaps less than 2~seconds long \cite{shokouhi_teager_2017}.
 Similarly limitated temporal resolutions were reported by Andrei et al. for their previous works on a related task,
-but in one of their recent proposals using a Deep Learning based method,
-Andrei et al. reported achieving one of the better results in detecting overlaps of
+but in their recent proposals using a deep learning based method,
+Andrei et al. reported achieving one of the better results in detecting artificial overlaps of
 500,~100~and~25~ms \textit{window durations} \cite{AndreiDetectingOverlappedSpeech2017}
-(it is unclear from the paper if this is also the temporal resolution, i.e. the \textit{hop-size}, at which the predictions were made, neither is the distribution of the lengths of overlaps).
+(it is not clear in the paper if this is also the temporal resolution, i.e. the \textit{hop-size}, at which the predictions were made, neither is the distribution of the lengths of overlaps).
 They combined MFCC with three other acoustic features to train a convolutional neural network.
 However, no evaluations of such systems have been reported on detecting natural double-talks in real conversations,
-while our own exploratory ones were not encouraging.
+while our own exploratory ones along this line were not encouraging.
 
 We believe that this approach of artificially increasing the training data for
 this task has some significant pitfalls.
@@ -200,7 +201,7 @@ partly forced by our choice of the dataset,
 but mainly motivated by our desire for the system to be applicable to almost any recording setup
 (Section~\ref{sec:dataset}).
 Here we describe effective training strategies for counteracting the class-imbalance
-(Section~\ref{sec:imbalance}) and evaluate their impact (Section~\ref{sec:eval}).
+(Section~\ref{sec:imbalance}) and evaluate their impacts (Section~\ref{sec:eval}).
 % alongside the benefits of temporal smoothing using Viterbi algorithm .
 
 % -------------------------------------------------------------------------------------- APPROACH -
@@ -215,7 +216,7 @@ For the purpose of reducing the mismatch between training and testing conditions
 and, given the features are log-scaled, as a measure against convolutive channel distortions \cite{li_overview_2014},
 we applied Cepstral Mean Normalization (CMN) on the extracted features.
 However, we performed this on a chunk-by-chunk basis,
-where the mean vector of a roughly 2.5~minutes long contiguous chunk of audio of was used to center all the vectors of that chunk.
+where the mean vector of a roughly 2.5~minutes long contiguous chunk of audio was used to center all the vectors of that chunk.
 This avoids the reliability issues with utterance level CMN \cite{prasad_improved_2013}
 since the chunks are longer,
 while also avoiding any impact of unrelated outliers if it were done over the entire datatset.
@@ -285,7 +286,7 @@ We used the Viterbi algorithm \cite{rabiner_tutorial_1989} for decoding a tempor
 The prior- and transition-probabilties were calculated on the training set and,
 being class posteriors, the emission-probabilties were set to $1$.
 Unlike many previous works \cite{zelenak_simultaneous_2012,zelenak_speaker_2012,GeigerUsinglinguisticinformation2013,yella_overlapping_2014,geiger_detecting_2013} however,
-we did not use an overlap-insertion penalty or manually modify the calculated probabilities.
+we did not use an overlap-insertion-penalty or manually modify the calculated probabilities.
 
 % ---------------------------------------------------------------------------- FIG:RAW-SMTH-PREDS -
 \begin{figure*}[t]
@@ -299,7 +300,7 @@ we did not use an overlap-insertion penalty or manually modify the calculated pr
 % --------------------------------------------------------------------------------------- DATASET -
 \section{Dataset} \label{sec:dataset}
 Previous works on detecting overlapping speech in conversations have used AMI, NIST RT, ICSI,
-and other meeting datasets (all mentioned in \cite{cetin_speaker_2006}).
+and other meeting corpora (all mentioned in \cite{cetin_speaker_2006}).
 While they are appropriate, and perhaps the flagship scenario for this problem,
 these datasets pose extra challenges due to inconsistent and difficult recording conditions.
 Furthermore, previous works have utilized only a subset of these datasets,
@@ -311,7 +312,7 @@ Most of its telephone based conversations have naturally occurring double-talks,
 and the shear size ($\sim \! \text{961~hours}$) of the available data makes certain simpler decisions later more affordable.
 However, we only used $\sim \! \text{200~hours}$
 ($\sim \! \text{10\%}\,(ov)$) of the dataset during trainings
-(groups~001~to~012, with 1299~calls) and a fixed set of
+(groups~000~to~012, with 1299~calls) and a fixed set of
 $\sim \! \text{91~hours}$ ($\sim \! \text{14\%}\,(ov)$) for testing
 (groups~053~to~058, with 551~calls),
 mainly restricted by the computational cost.
@@ -325,15 +326,15 @@ but it is easier to reliably downsample audios of higher quality than doing the 
 In fact, by using mel-scaling with a fixed number of filter-banks,
 our system can ingest audio of any sample-rate.
 Along same lines,
-the raw audios have two speaker specific channels which, when merged,
+the raw audios have two independent speaker channels which, when merged,
 can only be used as mono-aural audios.
-While using multi-channel audio could be better for performance,
+While using stereo audio could be better for performance,
 by supporting this least common denominator condition,
 our system is applicable to almost all scenarios.
 
 A more pertinent problem with the Corpus is the relative imprecision in the utterance boundaries.
 As per the documentation,
-these boundaries were determined by a speech activity detection system and not manually verified,
+these boundaries were determined by a speech activity detection system and not manually adjusted later,
 but the properties of this system have not been mentioned,
 and we found it to be less precise than ideal, especially in regions of small gaps.
 These inaccuracies do not impact ASR systems as much as they would a system that needs to temporally localize events in the audio.
@@ -369,10 +370,10 @@ but we did not do this due to the imprecise boundary annotations in most speech 
 Silence, or lack of speech, is more easily discriminable than speech from any number of speakers,
 whereas discriminating between speech produced by a single speaker and that produced by multiple speakers simultaneously, even in isolation, can prove difficult.
 This problem becomes more severe due the imbalance disadvantaging overlapping speech more,
-and may result in a neural network getting stuck in a steep local minima where its objective for detecting silence is met very well, but not at all for double-talk detection.
+and may result in a neural network getting stuck in steep local minima where its objective for detecting silence is met very well, but not at all for double-talk detection.
 Furtheremore, silence detection can be done by using much simpler methods than an expensive DCNN.
 Therefore, similar to most previous works,
-we experimented with removing all silence frames during training based on the true labels.
+we experimented with removing all silence frames based on true labels during training.
 To enable temporal smoothing during evaluations of these experiments,
 we explicitly set the silence frames to be perfect predictions based on the true labels for silence.
 
@@ -420,7 +421,7 @@ Some of the least powerful architectures predicted all fames to only be $(sp)$,
 often with posterior probability as $1$, where not even temporal-smoothing could have helped.
 % This is the classic case where a metric like overall accuracy would have been misleading.
 A common degenerate case with moderately powerful architectures was where the system would perform robustly in detecting $(no)$ but will never detect any $(ov)$.
-This unexpected voiced-activity detector demonstrated the extra disadvantage $(ov)$ face when $(no)$ is kept during training.
+This unexpected voiced-activity detector demonstrated the extra disadvantage $(ov)$ face when $(no)$ are kept during training.
 When some measures like threshold-moving were applied,
 a common degenerate case involved extremely low precision for $(ov)$ ($P^{(ov)}$) from what seemed like random decisions for a frame to be $(sp)$ or $(ov)$.
 % Interestingly, in cases where silence was kept as part of the training objective,
@@ -459,9 +460,9 @@ leading to a substantial improvement in $P^{(ov)}$ at a still smaller relative c
 % ----------------------------------------------------------------------------------- CONCLUSIONS -
 \section{Conclusions}
 We have demonstrated training a DCNN on real conversations to detect natural double-talks.
-Recognizing the difficulties posed by the traditionally used meeting datasets for this task,
+Recognizing the difficulties posed by the traditionally used meeting corpora for this task,
 we proposed using the Fisher English Corpus instead of artificially overlapped data for training.
-While the added limitation to only mono-aural audios at low sampling rate makes it one of the most technically difficult scenario for this task,
+While this adds limitation to only use mono-aural audios at low sampling rate and makes it one of the most technically difficult scenario for this task,
 it also makes the resulting system the most versatile in applicability.
 Using real conversations however poses the challenge of class-imbalance that severely disadvantages double-talks.
 However, even without tackling it, our DCNN learned some features unique to double-talks.
@@ -482,7 +483,7 @@ and reported improvements by temporal-smoothing of the posteriors using the Vite
 We therefore expect components that are capable of learning such patterns automatically to be more worthwhile modifications to investigate (e.g. LSTM cells).
 There is a lack of comprehensive studies for tackling class imbalance when using deep learning,
 especially in tasks related to speech technologies.
-We believe that this task could be a worthwhile candidate for such studies,
+We believe that this task could be a good candidate for such studies,
 if not only benefitting speech technologies that suffer in situations of overlapping speech.
 
 % ------------------------------------------------------------------------------ ACKNOWLEDGEMENTS -
